@@ -8,3 +8,4 @@ dependencyResolutionManagement {
 }
 rootProject.name = "gxd-table"
 include ':app'
+include ':form'
