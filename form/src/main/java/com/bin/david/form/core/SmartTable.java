@@ -15,6 +15,7 @@ import com.bin.david.form.component.ITableTitle;
 import com.bin.david.form.component.TableProvider;
 import com.bin.david.form.component.TableTitle;
 import com.bin.david.form.component.XSequence;
+import com.bin.david.form.component.YColorBar;
 import com.bin.david.form.component.YSequence;
 import com.bin.david.form.data.TableInfo;
 import com.bin.david.form.data.column.Column;
@@ -38,17 +39,33 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class SmartTable<T> extends View implements OnTableChangeListener
 {
-
+    /**
+     * 顶部行序号
+     */
     private XSequence<T> xAxis;
 
+    /**
+     * 左侧列序号
+     */
     private YSequence<T> yAxis;
+
+    /**
+     * 左侧颜色条
+     */
+    private YColorBar<T> yColorBar;
 
     private ITableTitle tableTitle;
 
     private TableProvider<T> provider;
 
+    /**
+     * 屏幕显示的整个表格的范围
+     */
     private Rect showRect;
 
+    /**
+     * 表格的范围，包括屏幕没有显示出来的范围
+     */
     private Rect tableRect;
 
     private TableConfig config;
@@ -111,6 +128,7 @@ public class SmartTable<T> extends View implements OnTableChangeListener
         tableRect = new Rect();
         xAxis = new XSequence<>();
         yAxis = new YSequence<>();
+        yColorBar = new YColorBar<>();
         parser = new TableParser<>();
         provider = new TableProvider<>();
         config.setPaint(paint);
@@ -144,6 +162,7 @@ public class SmartTable<T> extends View implements OnTableChangeListener
             showRect.set(getPaddingLeft(), getPaddingTop(),
                     getWidth() - getPaddingRight(),
                     getHeight() - getPaddingBottom());
+
             if (tableData != null)
             {
                 Rect rect = tableData.getTableInfo().getTableRect();
@@ -182,6 +201,7 @@ public class SmartTable<T> extends View implements OnTableChangeListener
                         xAxis.onMeasure(scaleRect, showRect, config);
                         xAxis.onDraw(canvas, showRect, tableData, config);
                     }
+                   
                     if (isYSequenceRight)
                     {
                         canvas.save();

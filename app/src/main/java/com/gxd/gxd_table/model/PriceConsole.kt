@@ -8,7 +8,7 @@ package com.gxd.gxd_table.model
  */
 class PriceConsole
 {
-    var color: String? = null
+    var color: Int = 0
 
     var calendar: String? = null
 
@@ -16,7 +16,7 @@ class PriceConsole
 
     var channel: String? = null
 
-    var date: Int? = null
+    var date: String? = null
 
     var dateType: Int? = null
 
