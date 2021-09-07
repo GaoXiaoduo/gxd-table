@@ -6,6 +6,7 @@ import com.bin.david.form.data.CellInfo;
 import com.bin.david.form.data.column.Column;
 import com.bin.david.form.data.format.bg.IBackgroundFormat;
 import com.bin.david.form.data.format.bg.ICellBackgroundFormat;
+import com.bin.david.form.data.format.draw.IDrawFormat;
 import com.bin.david.form.data.format.draw.LeftTopDrawFormat;
 import com.bin.david.form.data.format.grid.IGridFormat;
 import com.bin.david.form.data.format.grid.SimpleGridFormat;
@@ -168,7 +169,7 @@ public class TableConfig
     /**
      * 是否显示左侧颜色条
      */
-    private boolean isShowYColorBar = true;
+    private boolean isShowYColorBar = false;
 
     /**
      * 是否显示表格标题
@@ -204,6 +205,21 @@ public class TableConfig
      * 统计行格子背景格式化
      */
     private ICellBackgroundFormat<Column> countBgCellFormat;
+
+    /**
+     * 左上角日历背景
+     */
+    private IBackgroundFormat calendarBackground;
+
+    /**
+     * 左上角日历网格格式化
+     */
+    private IGridFormat calendarGridFormat = new SimpleGridFormat();
+
+    /**
+     * 左上角日历文字格式化
+     */
+    private IDrawFormat<Integer> calendarTextFormat;
 
     /**
      * 是否固定左侧编号
@@ -919,4 +935,81 @@ public class TableConfig
         this.textLeftOffset = textLeftOffset;
         return this;
     }
+
+    /**
+     * 获取左上角日历背景格式化
+     *
+     * @return
+     */
+    public IBackgroundFormat getCalendarBackground ()
+    {
+
+        return this.calendarBackground;
+    }
+
+    /**
+     * 设置左上角日历背景
+     *
+     * @param calendarBackground
+     *
+     * @return
+     */
+    public TableConfig setCalendarBackground (IBackgroundFormat calendarBackground)
+    {
+
+        this.calendarBackground = calendarBackground;
+        return this;
+    }
+
+    /**
+     * 获取左上角日历网格
+     *
+     * @return
+     */
+    public IGridFormat getCalendarGridFormat ()
+    {
+
+        return calendarGridFormat;
+    }
+
+    /**
+     * 设置左上角日历网格
+     *
+     * @param calendarGridFormat 左上角日历网格
+     *
+     * @return
+     */
+    public TableConfig setCalendarGridFormat (IGridFormat calendarGridFormat)
+    {
+
+        this.calendarGridFormat = calendarGridFormat;
+        return this;
+    }
+
+    /**
+     * 获取左上角日历文字格式化
+     *
+     * @return
+     */
+    public IDrawFormat getCalendarTextFormat ()
+    {
+
+        return calendarTextFormat;
+    }
+
+    /**
+     * 设置左上角日历文字格式化
+     *
+     * @param calendarTextFormat 左上角日历文字格式化
+     *
+     * @return
+     */
+    public TableConfig setCalendarTextFormat (IDrawFormat<Integer> calendarTextFormat)
+    {
+
+        this.calendarTextFormat = calendarTextFormat;
+        return this;
+    }
+
+
 }

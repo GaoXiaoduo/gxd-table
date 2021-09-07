@@ -1,8 +1,8 @@
 package com.gxd.gxd_table
 
+import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
-import android.graphics.Rect
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -11,11 +11,12 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import com.bin.david.form.data.CellInfo
 import com.bin.david.form.data.CellRange
 import com.bin.david.form.data.column.Column
+import com.bin.david.form.data.format.bg.BaseBackgroundFormat
 import com.bin.david.form.data.format.draw.MultiLineDrawFormat
-import com.bin.david.form.data.format.grid.BaseAbstractGridFormat
+import com.bin.david.form.data.format.draw.TextImageDrawFormat
+import com.bin.david.form.data.format.grid.BaseGridFormat
 import com.bin.david.form.data.table.TableData
 import com.bin.david.form.utils.DensityUtils
 import com.gxd.gxd_table.databinding.ActivityMainBinding
@@ -65,25 +66,27 @@ class MainActivity : AppCompatActivity()
 
     private fun initData()
     {
+        val dateWidth = DensityUtils.dp2px(this@MainActivity, 50f)
+
         val colorColumn = Column<PriceConsole>("", "color", MultiLineDrawFormat<PriceConsole>(1))
-        colorColumn.isFixed = true
+        colorColumn.isFixed = false
         colorColumn.isAutoMerge = true
         colorColumn.isColorBar = true
         // colorColumn.width = 1
 
-        val houseNameColumn = Column<PriceConsole>("房价名称", "houseName", MultiLineDrawFormat<PriceConsole>(100))
-        houseNameColumn.isFixed = true
+        val houseNameColumn = Column<PriceConsole>("房型", "houseName", MultiLineDrawFormat<PriceConsole>(200))
+        houseNameColumn.isFixed = false
         houseNameColumn.isAutoMerge = true
 
-        val channelColumn = Column<PriceConsole>("渠道", "channel", MultiLineDrawFormat<PriceConsole>(30))
-        channelColumn.isFixed = true
+        val channelColumn = Column<PriceConsole>("渠道", "channel", MultiLineDrawFormat<PriceConsole>(40))
+        channelColumn.isFixed = false
 
         val calendarColumn = Column<PriceConsole>("日历", colorColumn, houseNameColumn, channelColumn) // MultiLineDrawFormat<PriceConsole>(140)) // houseNameColumn) //, channelColumn)
         calendarColumn.isFixed = true
 
         mColumList.add(calendarColumn)
 
-        val dateWidth = DensityUtils.dp2px(this@MainActivity, 50f)
+
         // 列数
         for (i: Int in 0..10)
         {
@@ -91,7 +94,7 @@ class MainActivity : AppCompatActivity()
             info.date = (i + 1).toString()
 
             //val columnDate = Column<PriceConsole>("9/18", "date", MultiLineDrawFormat<PriceConsole>(30))
-            val column = Column<PriceConsole>("日期", "date", MultiLineDrawFormat<PriceConsole>(dateWidth)) // columnDate)
+            val column = Column<PriceConsole>("五\n17", "date", MultiLineDrawFormat<PriceConsole>(dateWidth)) // columnDate)
 
             mColumList.add(column)
         }
@@ -150,66 +153,89 @@ class MainActivity : AppCompatActivity()
         // 隐藏列标题
         mBinding.table.config.isShowColumnTitle = true
         // 固定标题
-        mBinding.table.config.isFixedTitle = true
-        // 显示左侧颜色条
-        mBinding.table.config.isShowYColorBar = false
-        // 固定左侧颜色条
-        mBinding.table.config.isFixedYColorBar = false
+        //mBinding.table.config.isFixedTitle = true
         // 固定左侧颜色条颜色值数组
         mBinding.table.config.yColorBarArray = getYColorBar()
+        // 设置日历背景
+        mBinding.table.config.calendarBackground = BaseBackgroundFormat(ContextCompat.getColor(this@MainActivity, R.color.white))
+        // 设置日历网格
+        mBinding.table.config.calendarGridFormat = object : BaseGridFormat()
+        {
+            override fun drawTableBorderGrid(canvas: Canvas, left: Int, top: Int, right: Int, bottom: Int, paint: Paint)
+            {
+                paint.strokeWidth = mBinding.table.config.contentGridStyle.width
+                paint.color = mBinding.table.config.contentGridStyle.color
+                canvas.drawRect(left.toFloat(), top.toFloat(), right.toFloat(), bottom.toFloat(), paint)
+            }
+        }
+        // 设置日历文字格式化
+        mBinding.table.config.setCalendarTextFormat(object : TextImageDrawFormat<Int>(40, 20, BOTTOM, 0)
+        {
+            override fun getContext(): Context
+            {
+                return this@MainActivity
+            }
+
+            override fun getResourceID(t: Int?, value: String?, position: Int): Int
+            {
+                return R.mipmap.ic_calendar_down
+            }
+
+        })
+
         // 设置网格线
-        mBinding.table.config.tableGridFormat =
-                object : BaseAbstractGridFormat()
-                {
-
-                    override fun isShowVerticalLine(col: Int, row: Int, cellInfo: CellInfo<*>): Boolean
-                    {
-                        return true //col % 2 == 0
-                    }
-
-                    override fun isShowHorizontalLine(col: Int, row: Int, cellInfo: CellInfo<*>): Boolean
-                    {
-                        return true //row % 2 == 0
-                    }
-
-                    override fun isShowColumnTitleVerticalLine(col: Int, column: Column<*>): Boolean
-                    {
-                        Log.d(TAG, "网格线 垂直 列:$col,column:${column?.columnName},width:${column?.width},computeWidth:${column?.computeWidth}")
-
-                        if (col == 0 || col == 1)
-                        {
-                            return false
-                        }
-                        return true
-                    }
-
-                    override fun isShowColumnTitleHorizontalLine(col: Int, column: Column<*>): Boolean
-                    {
-                        // Log.d(TAG, "网格线 水平 列:$col,column:${column?.columnName}")
-
-                        if (col == 0 || col == 1 || col == 2)
-                        {
-                            return false
-                        }
-                        return true
-                    }
-
-
-                    //            override fun drawTableBorderGrid(canvas: Canvas?, left: Int, top: Int, right: Int, bottom: Int, paint: Paint?)
-                    //            {
-                    //                //                paint!!.strokeWidth = 10f
-                    //                //                paint.color = Color.GREEN
-                    //                //                canvas!!.drawRect(left.toFloat(), top.toFloat(), right.toFloat(), bottom.toFloat(), paint)
-                    //            }
-                    //
-                    override fun drawColumnTitleGrid(canvas: Canvas?, rect: Rect?, column: Column<*>, col: Int, paint: Paint?)
-                    {
-                        super.drawColumnTitleGrid(canvas, rect, column, col, paint)
-                        //                        paint!!.strokeWidth = 10f
-                        //                        paint.color = Color.RED
-                        //                        canvas!!.drawRect(0f, 0f, 200f, 400f, paint)
-                    }
-                }
+        //        mBinding.table.config.tableGridFormat =
+        //                object : BaseAbstractGridFormat()
+        //                {
+        //
+        //                    override fun isShowVerticalLine(col: Int, row: Int, cellInfo: CellInfo<*>): Boolean
+        //                    {
+        //                        return true //col % 2 == 0
+        //                    }
+        //
+        //                    override fun isShowHorizontalLine(col: Int, row: Int, cellInfo: CellInfo<*>): Boolean
+        //                    {
+        //                        return true //row % 2 == 0
+        //                    }
+        //
+        //                    override fun isShowColumnTitleVerticalLine(col: Int, column: Column<*>): Boolean
+        //                    {
+        //                        Log.d(TAG, "网格线 垂直 列:$col,column:${column?.columnName},width:${column?.width},computeWidth:${column?.computeWidth}")
+        //
+        //                        if (col == 0 || col == 1)
+        //                        {
+        //                            return false
+        //                        }
+        //                        return true
+        //                    }
+        //
+        //                    override fun isShowColumnTitleHorizontalLine(col: Int, column: Column<*>): Boolean
+        //                    {
+        //                        // Log.d(TAG, "网格线 水平 列:$col,column:${column?.columnName}")
+        //
+        //                        if (col == 0 || col == 1 || col == 2)
+        //                        {
+        //                            return false
+        //                        }
+        //                        return true
+        //                    }
+        //
+        //
+        //                    //            override fun drawTableBorderGrid(canvas: Canvas?, left: Int, top: Int, right: Int, bottom: Int, paint: Paint?)
+        //                    //            {
+        //                    //                //                paint!!.strokeWidth = 10f
+        //                    //                //                paint.color = Color.GREEN
+        //                    //                //                canvas!!.drawRect(left.toFloat(), top.toFloat(), right.toFloat(), bottom.toFloat(), paint)
+        //                    //            }
+        //                    //
+        //                    override fun drawColumnTitleGrid(canvas: Canvas?, rect: Rect?, column: Column<*>, col: Int, paint: Paint?)
+        //                    {
+        //                        super.drawColumnTitleGrid(canvas, rect, column, col, paint)
+        //                        //                        paint!!.strokeWidth = 10f
+        //                        //                        paint.color = Color.RED
+        //                        //                        canvas!!.drawRect(0f, 0f, 200f, 400f, paint)
+        //                    }
+        //                }
 
     }
 

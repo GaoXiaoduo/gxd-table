@@ -12,9 +12,9 @@ import com.bin.david.form.data.TableInfo;
 import com.bin.david.form.data.column.Column;
 import com.bin.david.form.data.column.ColumnInfo;
 import com.bin.david.form.data.format.bg.BaseBackgroundFormat;
+import com.bin.david.form.data.format.bg.IBackgroundFormat;
 import com.bin.david.form.data.format.bg.ICellBackgroundFormat;
 import com.bin.david.form.data.format.draw.TextDrawFormat;
-import com.bin.david.form.data.format.grid.BaseAbstractGridFormat;
 import com.bin.david.form.data.format.selected.IDrawOver;
 import com.bin.david.form.data.format.selected.ISelectFormat;
 import com.bin.david.form.data.format.tip.ITip;
@@ -118,53 +118,6 @@ public class TableProvider<T> implements TableClickObserver
         drawCalendar(canvas, config);
     }
 
-    /**
-     * 绘制左上角日期文字
-     *
-     * @param canvas
-     * @param config
-     */
-    private void drawCalendar (Canvas canvas, TableConfig config)
-    {
-
-        List<ColumnInfo> columnInfoList = tableData.getColumnInfos();
-        List<Column> columns = tableData.getChildColumns();
-        Column column = columns.get(0);
-        Object data = column.getDatas().get(0);
-        int width = columnInfoList.get(0).width;
-        int top = columnInfoList.get(0).top;
-        int height = columnInfoList.get(4).height;
-
-        tempRect.set(showRect.left, top, width, height);
-        canvas.translate(0, 0);
-        canvas.save();
-        canvas.clipRect(tempRect);
-        cellInfo.set(column, data, "2021-09-02", 0, 0);
-        config.getContentGridStyle().fillPaint(config.getPaint());
-        new BaseBackgroundFormat(config.getYColorBarArray()[4]).drawBackground(canvas,
-                tempRect, new Paint());
-        new BaseAbstractGridFormat()
-        {
-            @Override
-            protected boolean isShowVerticalLine (int col, int row, CellInfo cellInfo)
-            {
-
-                return true;
-            }
-
-            @Override
-            protected boolean isShowHorizontalLine (int col, int row, CellInfo cellInfo)
-            {
-
-                return true;
-            }
-        }.drawTableBorderGrid(canvas, tempRect.left, tempRect.top, tempRect.right,
-                tempRect.bottom, config.getPaint());
-        new TextDrawFormat<T>().draw(canvas, tempRect, cellInfo, config);
-
-        canvas.restore();
-        canvas.save();
-    }
 
     /**
      * 设置基本信息和清除数据
@@ -553,6 +506,56 @@ public class TableProvider<T> implements TableClickObserver
             rect.left += config.getTextLeftOffset();
             cellInfo.column.getDrawFormat().draw(c, rect, cellInfo, config);
         }
+    }
+
+    /**
+     * 绘制左上角日期文字
+     *
+     * @param canvas
+     * @param config
+     */
+    private void drawCalendar (Canvas canvas, TableConfig config)
+    {
+
+        List<ColumnInfo> columnInfoList = tableData.getColumnInfos();
+        List<Column> columns = tableData.getChildColumns();
+        Column column = columns.get(0);
+        Object data = column.getDatas().get(0);
+        int width = columnInfoList.get(0).width;
+        int top = columnInfoList.get(0).top;
+        int height = columnInfoList.get(4).height;
+
+        tempRect.set(showRect.left, top, width, height);
+        canvas.translate(0, 0);
+        canvas.save();
+        canvas.clipRect(tempRect);
+        cellInfo.set(column, data, "2021-09-02", 0, 0);
+        config.getContentGridStyle().fillPaint(config.getPaint());
+
+        //绘制背景
+        IBackgroundFormat calendarBackground = config.getCalendarBackground();
+        if (calendarBackground != null)
+        {
+            calendarBackground.drawBackground(canvas, tempRect, new Paint());
+        }
+        //绘制网格
+        if (config.getCalendarGridFormat() != null)
+        {
+            config.getCalendarGridFormat().drawTableBorderGrid(canvas, tempRect.left,
+                    tempRect.top, tempRect.right, tempRect.bottom, config.getPaint());
+        }
+        //字体颜色跟随背景变化
+        //绘制文字+图标
+        if (config.getCalendarTextFormat() != null)
+        {
+            config.getCalendarTextFormat().draw(canvas, tempRect, cellInfo, config);
+        }
+        else
+        {
+            new TextDrawFormat<T>().draw(canvas, tempRect, cellInfo, config);
+        }
+        canvas.restore();
+        canvas.save();
     }
 
     /**

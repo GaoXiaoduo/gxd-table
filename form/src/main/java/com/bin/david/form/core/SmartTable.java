@@ -201,7 +201,7 @@ public class SmartTable<T> extends View implements OnTableChangeListener
                         xAxis.onMeasure(scaleRect, showRect, config);
                         xAxis.onDraw(canvas, showRect, tableData, config);
                     }
-                   
+
                     if (isYSequenceRight)
                     {
                         canvas.save();
@@ -358,12 +358,12 @@ public class SmartTable<T> extends View implements OnTableChangeListener
     /**
      * 添加数据
      * 通过这个方法可以实现动态添加数据，参数isFoot可以实现首尾添加
-     * // todo 添加列
+     * todo 添加列
      *
-     * @param t      新增数据
-     * @param isFoot 是否在尾部添加
+     * @param columns 新增列
+     * @param list    新增数据
      */
-    public void addColumns (final List<Column> columns, final List<T> t)
+    public void addColumns (final List<Column> columns, final List<T> list)
     {
 
         tableData.addColumns(columns);
