@@ -12,4 +12,5 @@
     <color name="y_color_bar_2">#FF839D</color>
     <color name="y_color_bar_3">#FFDD5C</color>
     <color name="y_color_bar_4">#57D1F3</color>
+    <color name="date_text_color">#99000000</color>
 </resources>

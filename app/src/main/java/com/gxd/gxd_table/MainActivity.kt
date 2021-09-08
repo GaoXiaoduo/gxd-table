@@ -17,6 +17,7 @@ import com.bin.david.form.data.format.bg.BaseBackgroundFormat
 import com.bin.david.form.data.format.draw.MultiLineDrawFormat
 import com.bin.david.form.data.format.draw.TextImageDrawFormat
 import com.bin.david.form.data.format.grid.BaseGridFormat
+import com.bin.david.form.data.format.title.DateTitleDrawFormat
 import com.bin.david.form.data.table.TableData
 import com.bin.david.form.utils.DensityUtils
 import com.gxd.gxd_table.databinding.ActivityMainBinding
@@ -92,18 +93,21 @@ class MainActivity : AppCompatActivity()
         {
             val info = PriceConsole()
             info.date = (i + 1).toString()
-
+            info.dateName = "六"
+            info.dateCompose = "${info.dateName}\n${info.date}"
             //val columnDate = Column<PriceConsole>("9/18", "date", MultiLineDrawFormat<PriceConsole>(30))
-            val column = Column<PriceConsole>("五\n17", "date", MultiLineDrawFormat<PriceConsole>(dateWidth)) // columnDate)
-
+            val column = Column<PriceConsole>(info.dateCompose, "dateCompose", MultiLineDrawFormat<PriceConsole>(dateWidth)) // columnDate)
+            //column.minHeight = 400
             mColumList.add(column)
         }
         // 行数
         for (i: Int in 0..17)
         {
             val info = PriceConsole()
+            info.date = (i + 1).toString()
+            info.dateName = "六"
             info.houseName = "房价名称：${(i / 4).toInt()}"
-            info.channel = "渠道：$i"
+            info.channel = "$i"
             //info.color = "${(i / 4).toInt()}"
             info.color = when
             {
@@ -128,7 +132,7 @@ class MainActivity : AppCompatActivity()
                     mColorBarArray!![0]
                 }
             }
-            info.date = "¥200\n余2"
+            info.dateCompose = "¥200\n余2"
             mData.add(info)
         }
 
@@ -182,6 +186,10 @@ class MainActivity : AppCompatActivity()
             }
 
         })
+        // 设置日期列标题格式
+        mBinding.table.config.columnDateTitleFormat = DateTitleDrawFormat(this@MainActivity,
+                R.mipmap.ic_room_price_date_bg, R.color.date_text_color)
+
 
         // 设置网格线
         //        mBinding.table.config.tableGridFormat =

@@ -10,6 +10,7 @@ import com.bin.david.form.data.format.draw.IDrawFormat;
 import com.bin.david.form.data.format.draw.LeftTopDrawFormat;
 import com.bin.david.form.data.format.grid.IGridFormat;
 import com.bin.david.form.data.format.grid.SimpleGridFormat;
+import com.bin.david.form.data.format.title.ITitleDrawFormat;
 import com.bin.david.form.data.style.FontStyle;
 import com.bin.david.form.data.style.LineStyle;
 
@@ -126,6 +127,11 @@ public class TableConfig
     private int horizontalPadding = 10;
 
     /**
+     * 日期列标题高度
+     */
+    private int columnDateTitleHeight = 92;
+
+    /**
      * 组标题背景
      */
     private IBackgroundFormat columnTitleBackground;
@@ -220,6 +226,11 @@ public class TableConfig
      * 左上角日历文字格式化
      */
     private IDrawFormat<Integer> calendarTextFormat;
+
+    /**
+     * 日期列标题文字格式化
+     */
+    private ITitleDrawFormat columnDateTitleFormat;
 
     /**
      * 是否固定左侧编号
@@ -1011,5 +1022,55 @@ public class TableConfig
         return this;
     }
 
+
+    /**
+     * 获取日期列标题文字格式化
+     *
+     * @return
+     */
+    public ITitleDrawFormat getColumnDateTitleFormat ()
+    {
+
+        return columnDateTitleFormat;
+    }
+
+    /**
+     * 设置日期列标题文字格式化
+     *
+     * @param columnDateTitleFormat 日期列标题文字格式化
+     *
+     * @return
+     */
+    public TableConfig setColumnDateTitleFormat (ITitleDrawFormat columnDateTitleFormat)
+    {
+
+        this.columnDateTitleFormat = columnDateTitleFormat;
+        return this;
+    }
+
+    /**
+     * 获取日期列标题高度
+     *
+     * @return
+     */
+    public int getColumnDateTitleHeight ()
+    {
+
+        return columnDateTitleHeight;
+    }
+
+    /**
+     * 设置日期列标题高度
+     *
+     * @param columnDateTitleHeight 设置日期列标题高度
+     *
+     * @return
+     */
+    public TableConfig setColumnDateTitleHeight (int columnDateTitleHeight)
+    {
+
+        this.columnDateTitleHeight = columnDateTitleHeight;
+        return this;
+    }
 
 }

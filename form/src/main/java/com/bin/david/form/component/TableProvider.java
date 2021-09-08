@@ -239,6 +239,7 @@ public class TableProvider<T> implements TableClickObserver
         int dis = showRect.top - scaleRect.top;
         TableInfo tableInfo = tableData.getTableInfo();
         int titleHeight = tableInfo.getTitleHeight() * tableInfo.getMaxLevel();
+
         int clipHeight = config.isFixedTitle() ? titleHeight : Math.max(0, titleHeight - dis);
         if (config.getColumnTitleBackground() != null)
         {
@@ -336,8 +337,15 @@ public class TableProvider<T> implements TableClickObserver
                 config.getTableGridFormat().drawColumnTitleGrid(canvas, tempRect, info
                         .column, position, paint);
             }
-            tableData.getTitleDrawFormat().draw(canvas, info.column, tempRect, config);
-
+            //tableData.getTitleDrawFormat().draw(canvas, info.column, tempRect, config);
+            if (config.getColumnDateTitleFormat() != null)
+            {
+                config.getColumnDateTitleFormat().draw(canvas, info.column, tempRect, config);
+            }
+            else
+            {
+                tableData.getTitleDrawFormat().draw(canvas, info.column, tempRect, config);
+            }
         }
     }
 
