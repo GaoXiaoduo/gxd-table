@@ -14,6 +14,7 @@ import androidx.core.content.ContextCompat
 import com.bin.david.form.data.CellRange
 import com.bin.david.form.data.column.Column
 import com.bin.david.form.data.format.bg.BaseBackgroundFormat
+import com.bin.david.form.data.format.draw.ImageResDrawFormat
 import com.bin.david.form.data.format.draw.MultiLineDrawFormat
 import com.bin.david.form.data.format.draw.TextImageDrawFormat
 import com.bin.david.form.data.format.grid.BaseGridFormat
@@ -78,8 +79,20 @@ class MainActivity : AppCompatActivity()
         val houseNameColumn = Column<PriceConsole>("房型", "houseName", MultiLineDrawFormat<PriceConsole>(200))
         houseNameColumn.isFixed = false
         houseNameColumn.isAutoMerge = true
+        val channelIconWidth = DensityUtils.dp2px(this@MainActivity, 23f)
+        val channelColumn = Column<String>("渠道", "channel", object : ImageResDrawFormat<String>(channelIconWidth, channelIconWidth)
+        {
+            override fun getContext(): Context
+            {
+                return this@MainActivity
+            }
 
-        val channelColumn = Column<PriceConsole>("渠道", "channel", MultiLineDrawFormat<PriceConsole>(40))
+            override fun getResourceID(isCheck: String, value: String, position: Int): Int
+            {
+                return R.mipmap.ic_room_price_date_bg
+
+            }
+        })
         channelColumn.isFixed = false
 
         val calendarColumn = Column<PriceConsole>("日历", colorColumn, houseNameColumn, channelColumn) // MultiLineDrawFormat<PriceConsole>(140)) // houseNameColumn) //, channelColumn)
@@ -107,7 +120,7 @@ class MainActivity : AppCompatActivity()
             info.date = (i + 1).toString()
             info.dateName = "六"
             info.houseName = "房价名称：${(i / 4).toInt()}"
-            info.channel = "$i"
+            info.channel = "渠道$i"
             //info.color = "${(i / 4).toInt()}"
             info.color = when
             {
