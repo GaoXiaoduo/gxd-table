@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -20,11 +21,12 @@ import com.bin.david.form.data.format.draw.TextImageDrawFormat
 import com.bin.david.form.data.format.grid.BaseGridFormat
 import com.bin.david.form.data.format.title.DateTitleDrawFormat
 import com.bin.david.form.data.table.TableData
+import com.bin.david.form.listener.OnTableScrollRangeListener
 import com.bin.david.form.utils.DensityUtils
 import com.gxd.gxd_table.databinding.ActivityMainBinding
 import com.gxd.gxd_table.model.PriceConsole
 
-class MainActivity : AppCompatActivity()
+class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
 {
     private var _binding: ActivityMainBinding? = null
 
@@ -263,8 +265,9 @@ class MainActivity : AppCompatActivity()
     private fun tableClick()
     {
         mTableData?.onItemClickListener = TableData.OnItemClickListener<String> { column, value, info, col, row ->
-            Log.d(TAG, "点击事件 列:$col,行:$row,数据：$value,T:$info")
+            Log.d(TAG, "点击事件 列:$col,行:$row,数据：$value,T:${info.toString()}")
         }
+        mBinding.table.onTableScrollRangeListener = this
     }
 
     private fun addColumns()
@@ -308,8 +311,25 @@ class MainActivity : AppCompatActivity()
         return intArrayOf(yColorBar1, yColorBar2, yColorBar3, yColorBar4, yColorBar5)
     }
 
+
+    override fun onTableScrollToRight()
+    {
+        Toast.makeText(this, "我到最右边了", Toast.LENGTH_SHORT)
+                .show()
+        Log.d(TAG, "滚动 边界 isRight")
+    }
+
+    override fun onTableScrollToLeft()
+    {
+
+        Toast.makeText(this, "我到最左边了", Toast.LENGTH_SHORT)
+                .show()
+        Log.d(TAG, "滚动 边界 isLeft")
+    }
+
     companion object
     {
         const val TAG = "表格"
     }
+
 }

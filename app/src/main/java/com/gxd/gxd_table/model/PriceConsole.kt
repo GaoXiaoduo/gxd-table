@@ -31,4 +31,9 @@ class PriceConsole
     var dateName: String? = null
 
     var price: Int? = null
+    override fun toString(): String
+    {
+        return "PriceConsole(color=$color, calendar=$calendar, houseName=$houseName, channel=$channel, date=$date, dateCompose=$dateCompose, dateType=$dateType, dateWorkState=$dateWorkState, dateName=$dateName, price=$price)"
+    }
+
 }
