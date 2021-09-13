@@ -11,8 +11,7 @@ import com.bin.david.form.data.table.TableData;
 import com.bin.david.form.exception.TableException;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -42,7 +41,7 @@ public class TableParser<T>
         addArrayNode(tableInfo, tableData.getChildColumns());
         if (!(tableData instanceof ArrayTableData))
         {
-            sort(tableData);
+            // sort(tableData);
             try
             {
                 List<T> dataList = tableData.getT();
@@ -179,91 +178,118 @@ public class TableParser<T>
     /**
      * 添加数据
      */
-    public void addData (TableData<T> tableData, List<T> addData, boolean isFoot)
+    public void addData (TableData<T> tableData, HashMap<String, List<T>> addData, boolean isFoot)
     {
 
-        try
-        {
-
-            int size = tableData.getLineSize();
-            if (isFoot)
-            {
-                tableData.getT().addAll(addData);
-            }
-            else
-            {
-                tableData.getT().addAll(0, addData);
-            }
-            TableInfo tableInfo = tableData.getTableInfo();
-            tableInfo.addLine(addData.size(), isFoot);
-            tableData.clearCellRangeAddresses();
-            int i = 0;
-            for (Column column : tableData.getChildColumns())
-            {
-                column.addData(addData, size, isFoot);
-                List<int[]> ranges = column.parseRanges();
-                if (ranges != null && ranges.size() > 0)
-                {
-                    for (int[] range : ranges)
-                    {
-                        tableData.addCellRange(new CellRange(range[0], range[1], i, i));
-                    }
-                }
-                i++;
-            }
-            calculateArrayCellSize(tableInfo, tableData.getChildColumns());
-
-        } catch (NoSuchFieldException e)
-        {
-            throw new TableException(
-                    "NoSuchFieldException :Please check whether field name is correct!");
-        } catch (IllegalAccessException e)
-        {
-            throw new TableException(
-                    "IllegalAccessException :Please make sure that access objects are allowed!");
-        }
+        //        try
+        //        {
+        //
+        //            int size = tableData.getLineSize();
+        //            if (isFoot)
+        //            {
+        //                tableData.getT().addAll(addData);
+        //            }
+        //            else
+        //            {
+        //                tableData.getT().addAll(0, addData);
+        //            }
+        //            TableInfo tableInfo = tableData.getTableInfo();
+        //            tableInfo.addLine(addData.size(), isFoot);
+        //            tableData.clearCellRangeAddresses();
+        //            int i = 0;
+        //            for (Column column : tableData.getChildColumns())
+        //            {
+        //                column.addData(addData, size, isFoot);
+        //                List<int[]> ranges = column.parseRanges();
+        //                if (ranges != null && ranges.size() > 0)
+        //                {
+        //                    for (int[] range : ranges)
+        //                    {
+        //                        tableData.addCellRange(new CellRange(range[0], range[1], i, i));
+        //                    }
+        //                }
+        //                i++;
+        //            }
+        //            calculateArrayCellSize(tableInfo, tableData.getChildColumns());
+        //
+        //        } catch (NoSuchFieldException e)
+        //        {
+        //            throw new TableException(
+        //                    "NoSuchFieldException :Please check whether field name is correct!");
+        //        } catch (IllegalAccessException e)
+        //        {
+        //            throw new TableException(
+        //                    "IllegalAccessException :Please make sure that access objects are
+        //                    allowed!");
+        //        }
     }
 
     /**
      * 添加列数据
-     * todo
+     * todo by gaoxiaoduo add
+     *
+     * @param tableData
+     * @param columns                  新增部分列
+     * @param addData                  新增列的数据
+     * @param isFoot                   是否在左侧添加
+     * @param startColumnPostion       新增部分需要添加的位置
+     * @param startChildColumnPosition 新增部分需要添加的子列位置
      */
     public void addColumnsData (
             TableData<T> tableData, List<Column> columns, List<T> addData,
-            boolean isFoot)
+            Boolean isFoot, int startColumnPostion, int startChildColumnPosition)
     {
 
+        int oldColumnSize = tableData.getT().size();
+        if (isFoot)
+        {
+            tableData.getT().addAll(addData);
+            tableData.getColumns().addAll(columns);
+            tableData.getChildColumns().addAll(columns);
+        }
+        else
+        {
+            tableData.getT().addAll(startChildColumnPosition, addData);
+            tableData.getColumns().addAll(startColumnPostion, columns);
+            tableData.getChildColumns().addAll(startChildColumnPosition, columns);
+        }
+
+        TableInfo tableInfo = tableData.getTableInfo();
+        tableInfo.addColumn(columns.size(), isFoot, startChildColumnPosition);
+        tableData.clearCellRangeAddresses();
+
+        int i = 0;
+        // 重绘原始表格
+        for (Column column : tableData.getChildColumns())
+        {
+            List<int[]> ranges = column.parseRanges();
+            if (ranges != null && ranges.size() > 0)
+            {
+                for (int[] range : ranges)
+                {
+                    tableData.addCellRange(new CellRange(range[0], range[1], i, i));
+                }
+            }
+            i++;
+        }
+        // 判断新增部分开始、结束区域
+        int start = startChildColumnPosition;
+        int end = startChildColumnPosition + columns.size();
+        if (isFoot)
+        {
+            start = oldColumnSize;
+            end = tableData.getChildColumns().size();
+        }
+        // 填充左右新增部分表格数据
         try
         {
+            for (int j = start; j < end; j++)
+            {
+                Column col = tableData.getChildColumns().get(j);
+                List<T> dataList = tableData.getT();
+                col.fillData(dataList);
+            }
 
-            int size = tableData.getColumns().size();
-            if (isFoot)
-            {
-                tableData.getT().addAll(addData);
-            }
-            else
-            {
-                tableData.getT().addAll(0, addData);
-            }
-            TableInfo tableInfo = tableData.getTableInfo();
-            //tableInfo.addColumn(addData.size(), isFoot);
-            //tableInfo.setColumnSize(tableData.getChildColumns().size());
-            tableInfo.addColumn(columns.size(), isFoot);
-            tableData.clearCellRangeAddresses();
-            int i = 0;
-            for (Column column : tableData.getChildColumns())
-            {
-                column.addData(addData, size, isFoot);
-                List<int[]> ranges = column.parseRanges();
-                if (ranges != null && ranges.size() > 0)
-                {
-                    for (int[] range : ranges)
-                    {
-                        tableData.addCellRange(new CellRange(range[0], range[1], i, i));
-                    }
-                }
-                i++;
-            }
             calculateArrayCellSize(tableInfo, tableData.getChildColumns());
 
         } catch (NoSuchFieldException e)
@@ -273,8 +299,11 @@ public class TableParser<T>
         } catch (IllegalAccessException e)
         {
             throw new TableException(
-                    "IllegalAccessException :Please make sure that access objects are allowed!");
+                    "IllegalAccessException :Please make sure that access objects are " +
+                            "allowed!");
         }
+
+        tableData.setOnItemClickListener(tableData.getOnItemClickListener());
     }
 
     /**
@@ -284,72 +313,71 @@ public class TableParser<T>
      *
      * @return
      */
-    public List<Column> sort (TableData<T> tableData)
-    {
-
-        final Column sortColumn = tableData.getSortColumn();
-        if (sortColumn != null)
-        {
-            List<T> dataList = tableData.getT();
-            Collections.sort(dataList, new Comparator<T>()
-            {
-                @Override
-                public int compare (T o1, T o2)
-                {
-
-                    try
-                    {
-                        if (o1 == null)
-                        {
-                            return sortColumn.isReverseSort() ? 1 : -1;
-                        }
-                        if (o2 == null)
-                        {
-                            return sortColumn.isReverseSort() ? -1 : 1;
-                        }
-                        Object data = sortColumn.getData(o1);
-                        Object compareData = sortColumn.getData(o2);
-                        if (data == null)
-                        {
-                            return sortColumn.isReverseSort() ? 1 : -1;
-                        }
-                        if (compareData == null)
-                        {
-                            return sortColumn.isReverseSort() ? -1 : 1;
-                        }
-                        int compare;
-                        if (sortColumn.getComparator() != null)
-                        {
-                            compare = sortColumn.getComparator().compare(data, compareData);
-                            return sortColumn.isReverseSort() ? -compare : compare;
-                        }
-                        else
-                        {
-                            if (data instanceof Comparable)
-                            {
-                                compare = ((Comparable) data).compareTo(compareData);
-                                return sortColumn.isReverseSort() ? -compare : compare;
-                            }
-                            return 0;
-                        }
-                    } catch (NoSuchFieldException e)
-                    {
-                        throw new TableException(
-                                "NoSuchFieldException :Please check whether field name is " +
-                                        "correct!");
-                    } catch (IllegalAccessException e)
-                    {
-                        throw new TableException(
-                                "IllegalAccessException :Please make sure that access objects are" +
-                                        " allowed!");
-                    }
-                }
-            });
-        }
-        return tableData.getColumns();
-    }
-
-
+    //    public List<Column> sort (TableData<T> tableData)
+    //    {
+    //
+    //        final Column sortColumn = tableData.getSortColumn();
+    //        if (sortColumn != null)
+    //        {
+    //            HashMap<String, List<T>> dataList = tableData.getT();
+    //            Collections.sort(dataList, new Comparator<T>()
+    //            {
+    //                @Override
+    //                public int compare (T o1, T o2)
+    //                {
+    //
+    //                    try
+    //                    {
+    //                        if (o1 == null)
+    //                        {
+    //                            return sortColumn.isReverseSort() ? 1 : -1;
+    //                        }
+    //                        if (o2 == null)
+    //                        {
+    //                            return sortColumn.isReverseSort() ? -1 : 1;
+    //                        }
+    //                        Object data = sortColumn.getData(o1);
+    //                        Object compareData = sortColumn.getData(o2);
+    //                        if (data == null)
+    //                        {
+    //                            return sortColumn.isReverseSort() ? 1 : -1;
+    //                        }
+    //                        if (compareData == null)
+    //                        {
+    //                            return sortColumn.isReverseSort() ? -1 : 1;
+    //                        }
+    //                        int compare;
+    //                        if (sortColumn.getComparator() != null)
+    //                        {
+    //                            compare = sortColumn.getComparator().compare(data, compareData);
+    //                            return sortColumn.isReverseSort() ? -compare : compare;
+    //                        }
+    //                        else
+    //                        {
+    //                            if (data instanceof Comparable)
+    //                            {
+    //                                compare = ((Comparable) data).compareTo(compareData);
+    //                                return sortColumn.isReverseSort() ? -compare : compare;
+    //                            }
+    //                            return 0;
+    //                        }
+    //                    } catch (NoSuchFieldException e)
+    //                    {
+    //                        throw new TableException(
+    //                                "NoSuchFieldException :Please check whether field name is " +
+    //                                        "correct!");
+    //                    } catch (IllegalAccessException e)
+    //                    {
+    //                        throw new TableException(
+    //                                "IllegalAccessException :Please make sure that access
+    //                                objects are" +
+    //                                        " allowed!");
+    //                    }
+    //                }
+    //            });
+    //        }
+    //        return tableData.getColumns();
+    //    }
     private int getChildColumn (TableData<T> tableData)
     {
 

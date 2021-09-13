@@ -55,6 +55,13 @@ public class DateTitleDrawFormat implements ITitleDrawFormat
 
     private int dateRectHeight = 104;
 
+    /**
+     * 日期列标题
+     *
+     * @param context           上下文
+     * @param todayBgResourceID 今日背景图片资源ID
+     * @param dateTextColor     日期默认颜色
+     */
     public DateTitleDrawFormat (Context context, int todayBgResourceID, int dateTextColor)
     {
 
@@ -133,7 +140,7 @@ public class DateTitleDrawFormat implements ITitleDrawFormat
             String date = values[1];
             // drawGridBackground(c, rect, config);
             drawWeek(c, column, rect, paint, config, week);
-            drawTodayBitmap(c, column, rect, paint, config, true);
+            drawTodayBitmap(c, column, rect, paint, config, column.isToday());
             drawDate(c, column, rect, paint, config, date);
         }
     }
@@ -187,14 +194,16 @@ public class DateTitleDrawFormat implements ITitleDrawFormat
             boolean isToday)
     {
 
+        if (!isToday)
+        {
+            return;
+        }
         Bitmap bitmap = getBitmap();
         if (bitmap == null)
         {
             return;
         }
-        if (isToday)
-        {
-        }
+
         int top = rect.top + weekRectHeight;
         mTempRect.set(rect.left, top, rect.right, rect.bottom);
         Rect drawRect = new Rect();

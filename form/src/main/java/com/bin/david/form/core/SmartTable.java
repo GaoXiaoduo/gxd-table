@@ -30,6 +30,7 @@ import com.bin.david.form.listener.OnTableScrollRangeListener;
 import com.bin.david.form.matrix.MatrixHelper;
 import com.bin.david.form.utils.DensityUtils;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -333,7 +334,7 @@ public class SmartTable<T> extends View implements OnTableChangeListener
      * @param t      新增数据
      * @param isFoot 是否在尾部添加
      */
-    public void addData (final List<T> t, final boolean isFoot)
+    public void addData (final HashMap<String, List<T>> t, final boolean isFoot)
     {
 
         if (t != null && t.size() > 0)
@@ -362,32 +363,35 @@ public class SmartTable<T> extends View implements OnTableChangeListener
      * todo 添加列
      *
      * @param columns 新增列
-     * @param list    新增数据
+     * @param isFoot
      */
-    public void addColumns (final List<Column> columns, final List<T> list)
+    public void addColumns (
+            List<Column> columns, List<T> addData, Boolean isFoot,
+            int startColumnPosition, int startChildColumnPosition)
     {
 
-        tableData.addColumns(columns);
-        notifyDataChanged();
-        //        if (t != null && t.size() > 0)
-        //        {
-        //            isNotifying.set(true);
-        //            new Thread(new Runnable()
-        //            {
-        //                @Override
-        //                public void run ()
-        //                {
-        //
-        //                    tableData.addColumns(columns);
-        //                    parser.addColumnsData(tableData, columns, t, true);
-        //                    measurer.measure(tableData, config);
-        //                    requestReMeasure();
-        //                    postInvalidate();
-        //                    isNotifying.set(false);
-        //
-        //                }
-        //            }).start();
-        //        }
+        //        parser.addColumnsData(tableData, columns, addData, isFoot);
+        //        notifyDataChanged();
+
+        if (columns != null && columns.size() > 0)
+        {
+            isNotifying.set(true);
+            new Thread(new Runnable()
+            {
+                @Override
+                public void run ()
+                {
+
+                    parser.addColumnsData(tableData, columns, addData, isFoot,
+                            startColumnPosition, startChildColumnPosition);
+                    // parser.parse(tableData);
+                    measurer.measure(tableData, config);
+                    requestReMeasure();
+                    postInvalidate();
+                    isNotifying.set(false);
+                }
+            }).start();
+        }
     }
 
 

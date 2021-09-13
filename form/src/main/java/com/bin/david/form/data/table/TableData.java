@@ -60,6 +60,13 @@ public class TableData<T>
 
     private OnColumnClickListener<?> onColumnClickListener;
 
+    private OnCalendarClickListener onCalendarClickListener;
+
+    /**
+     * 当前显示的日期
+     */
+    private String mCalendarText;
+
     /**
      * @param tableName 表名
      * @param t         数据
@@ -154,6 +161,18 @@ public class TableData<T>
     {
 
         this.columns.addAll(columns);
+        // this.childColumns.addAll(columns);
+    }
+
+    /**
+     * 设置新列列表
+     * todo
+     */
+    public void addColumns (int index, List<Column> columns)
+    {
+
+        this.columns.addAll(index, columns);
+        // this.childColumns.addAll(index, columns);
     }
 
     /**
@@ -511,6 +530,28 @@ public class TableData<T>
         return userSetRangeAddress;
     }
 
+    /**
+     * 获取左上角日期
+     *
+     * @return
+     */
+    public String getCalendarText ()
+    {
+
+        return mCalendarText;
+    }
+
+    /**
+     * 设置左上角日期
+     *
+     * @param calendarText
+     */
+    public void setCalendarText (String calendarText)
+    {
+
+        this.mCalendarText = calendarText;
+    }
+
     public void clear ()
     {
 
@@ -612,8 +653,7 @@ public class TableData<T>
                 @Override
                 public void onClick (Column column, String value, Object o, int col, int row)
                 {
-
-                    TableData.this.onRowClickListener.onClick(column, t.get(row), col, row);
+                    // TableData.this.onRowClickListener.onClick(column, t.get(row), col, row);
                 }
             });
         }
@@ -651,6 +691,28 @@ public class TableData<T>
     }
 
     /**
+     * 获取日历区域点击事件接口
+     *
+     * @return
+     */
+    public OnCalendarClickListener getOnCalendarClickListener ()
+    {
+
+        return onCalendarClickListener;
+    }
+
+    /**
+     * 设置日历区域点击事件接口
+     *
+     * @param calendarClickListener 日历区域点击事件
+     */
+    public void setOnCalendarClickListener (final OnCalendarClickListener calendarClickListener)
+    {
+
+        this.onCalendarClickListener = calendarClickListener;
+    }
+
+    /**
      * 表格单元格Cell点击事件接口
      */
     public interface OnItemClickListener<T>
@@ -669,5 +731,13 @@ public class TableData<T>
     public interface OnColumnClickListener<T>
     {
         void onClick (Column column, List<T> t, int col, int row);
+    }
+
+    /**
+     * 表格左上角日历区域点击事件接口
+     */
+    public interface OnCalendarClickListener
+    {
+        void onClick (String value);
     }
 }

@@ -531,13 +531,21 @@ public class TableProvider<T> implements TableClickObserver
         Object data = column.getDatas().get(0);
         int width = columnInfoList.get(0).width;
         int top = columnInfoList.get(0).top;
-        int height = columnInfoList.get(4).height;
-
+        // 日历区域占用2个列标题的高度
+        int height = config.getColumnDateTitleHeight() * 2;
         tempRect.set(showRect.left, top, width, height);
+        if (DrawUtils.isClick(tempRect, clickPoint))
+        {
+
+            clickCalendar("日期测试");
+            isClickPoint = true;
+            clickPoint.set(-Integer.MAX_VALUE, -Integer.MAX_VALUE);
+        }
         canvas.translate(0, 0);
         canvas.save();
         canvas.clipRect(tempRect);
-        cellInfo.set(column, data, "2021-09-02", 0, 0);
+        String calendarText = tableData.getCalendarText();
+        cellInfo.set(column, data, calendarText, 0, 0);
         config.getContentGridStyle().fillPaint(config.getPaint());
 
         //绘制背景
@@ -564,6 +572,20 @@ public class TableProvider<T> implements TableClickObserver
         }
         canvas.restore();
         canvas.save();
+    }
+
+    /**
+     * 点击日历区域
+     *
+     * @param value
+     */
+    private void clickCalendar (String value)
+    {
+
+        if (!isClickPoint && tableData.getOnCalendarClickListener() != null)
+        {
+            tableData.getOnCalendarClickListener().onClick(value);
+        }
     }
 
     /**

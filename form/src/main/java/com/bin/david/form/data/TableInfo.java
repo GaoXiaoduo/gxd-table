@@ -186,44 +186,42 @@ public class TableInfo
      *
      * @param count 添加数量
      */
-    public void addColumn (int count, boolean isFoot)
+    public void addColumn (int count, Boolean isFoot, int startPosition)
     {
         // todo
-        //lineSize += count;
+        int oldSize = columnSize;
         columnSize += count;
         rangeCells = new Cell[lineSize][columnSize];
         int size = lineHeightArray.length;
-        //int[] tempArray = new int[size + count];
-        int[] tempArray = new int[size];
-        //数组复制
-        if (isFoot)
-        {
-            System.arraycopy(lineHeightArray, 0, tempArray, 0, size);
-        }
-        else
-        {
-            System.arraycopy(lineHeightArray, 0, tempArray, count, size);
-        }
-        lineHeightArray = tempArray;
         if (!isHasArrayColumn)
         {
             if (size == rangeCells.length)
             {
                 Cell[][] tempRangeCells = new Cell[size][columnSize];
-                //Cell[][] tempRangeCells = new Cell[size][columnSize];
-                //                for (int i = 0; i < size; i++)
-                //                {
-                //                    tempRangeCells[i + (isFoot ? 0 : count)] = rangeCells[i];
-                //                }
+
                 for (int i = 0; i < size; i++)
                 {
-                    for (int h = 0; h < columnSize; h++)
+                    Cell[] tmpCell = new Cell[columnSize];
+                    for (int j = 0; j < oldSize; j++)
                     {
-                        tempRangeCells[i + (isFoot ? 0 : count)] = rangeCells[i];
-                        tempRangeCells[i + (isFoot ? 0 : count)][h] = rangeCells[i][h];
+                        if (isFoot)
+                        {
+                            tmpCell[j + count] = rangeCells[i][j];
+                        }
+                        else
+                        {
+                            if (j < startPosition)
+                            {
+                                tmpCell[j] = rangeCells[i][j];
+                            }
+                            else
+                            {
+                                tmpCell[j + count] = rangeCells[i][j];
+                            }
+                        }
                     }
+                    tempRangeCells[i] = tmpCell;
                 }
-
                 rangeCells = tempRangeCells;
             }
         }

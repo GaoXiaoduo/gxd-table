@@ -91,6 +91,10 @@ public class Column<T> implements Comparable<Column>
      */
     private boolean isColorBar = false;
 
+    /**
+     * 是否为今天，true:是；false：不是
+     */
+    private boolean isToday = false;
 
     /**
      * 列构造方法
@@ -368,65 +372,31 @@ public class Column<T> implements Comparable<Column>
      * @throws IllegalAccessException
      */
 
-    public void fillData (List<Object> objects) throws NoSuchFieldException, IllegalAccessException
+    public void fillData (List<T> objects) throws NoSuchFieldException,
+                                                  IllegalAccessException
     {
 
         if (countFormat != null)
         {
             countFormat.clearCount();
         }
-        if (objects.size() > 0)
+        int size = objects.size();
+        if (size > 0)
         {
-            String[] fieldNames = fieldName.split("\\.");
-            if (fieldNames.length > 0)
+            for (int k = 0; k < size; k++)
             {
-                Field[] fields = new Field[fieldNames.length];
-                int size = objects.size();
-                for (int k = 0; k < size; k++)
+                Object child = objects.get(k);
+                Class childClazz = child.getClass();
+                Field columnNameField = childClazz.getDeclaredField("columnName");
+                columnNameField.setAccessible(true);
+                if ((String) columnNameField.get(child) == fieldName)
                 {
-                    Object child = objects.get(k);
-                    for (int i = 0; i < fieldNames.length; i++)
-                    {
-                        if (child == null)
-                        {
-                            addData(null, true);
-                            countColumnValue(null);
-                            break;
-                        }
-                        Field childField;
-                        if (fields[i] != null)
-                        {
-                            childField = fields[i];
-                        }
-                        else
-                        {
-                            Class childClazz = child.getClass();
-                            childField = childClazz.getDeclaredField(fieldNames[i]);
-                            childField.setAccessible(true);
-                            fields[i] = childField;
-                        }
-                        if (childField == null)
-                        {
-                            addData(null, true);
-                            countColumnValue(null);
-                            break;
-                        }
-                        if (i == fieldNames.length - 1)
-                        {
-                            T t = (T) childField.get(child);
-                            addData(t, true);
-                            countColumnValue(t);
-                        }
-                        else
-                        {
-                            child = childField.get(child);
-                        }
-                    }
-
+                    Field dataListField = childClazz.getDeclaredField("dataList");
+                    dataListField.setAccessible(true);
+                    setDatas((List<T>) dataListField.get(child));
                 }
             }
         }
-
     }
 
 
@@ -842,6 +812,26 @@ public class Column<T> implements Comparable<Column>
     {
 
         this.isColorBar = isColorBar;
+    }
+
+    /**
+     * 是否为今天，true:是；false：不是
+     *
+     * @return 是否固定
+     */
+    public boolean isToday ()
+    {
+
+        return isToday;
+    }
+
+    /**
+     * 是否为今天，true:是；false：不是
+     */
+    public void setToday (boolean isToday)
+    {
+
+        this.isToday = isToday;
     }
 
     /**

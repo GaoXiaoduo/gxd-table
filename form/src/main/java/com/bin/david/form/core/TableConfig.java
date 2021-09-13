@@ -70,6 +70,11 @@ public class TableConfig
     private FontStyle countStyle; //总和
 
     /**
+     * 左上角日历标题字体样式
+     */
+    private FontStyle calendarTitleStyle;
+
+    /**
      * 列标题网格样式
      */
     private LineStyle columnTitleGridStyle;
@@ -225,7 +230,7 @@ public class TableConfig
     /**
      * 左上角日历文字格式化
      */
-    private IDrawFormat<Integer> calendarTextFormat;
+    private IDrawFormat<String> calendarTextFormat;
 
     /**
      * 日期列标题文字格式化
@@ -588,6 +593,7 @@ public class TableConfig
         return this;
     }
 
+
     public FontStyle getTableTitleStyle ()
     {
 
@@ -602,6 +608,35 @@ public class TableConfig
     {
 
         this.tableTitleStyle = tableTitleStyle;
+        return this;
+    }
+
+    /**
+     * 获取左上角日历标题字体
+     *
+     * @return
+     */
+    public FontStyle getCalendarTitleStyle ()
+    {
+
+        if (calendarTitleStyle == null)
+        {
+            return defaultFontStyle;
+        }
+        return calendarTitleStyle;
+    }
+
+    /**
+     * 设置左上角日历标题字体
+     *
+     * @param calendarTitleStyle 左上角日历标题字体
+     *
+     * @return
+     */
+    public TableConfig setCalendarTitleStyle (FontStyle calendarTitleStyle)
+    {
+
+        this.calendarTitleStyle = calendarTitleStyle;
         return this;
     }
 
@@ -1015,7 +1050,7 @@ public class TableConfig
      *
      * @return
      */
-    public TableConfig setCalendarTextFormat (IDrawFormat<Integer> calendarTextFormat)
+    public TableConfig setCalendarTextFormat (IDrawFormat<String> calendarTextFormat)
     {
 
         this.calendarTextFormat = calendarTextFormat;

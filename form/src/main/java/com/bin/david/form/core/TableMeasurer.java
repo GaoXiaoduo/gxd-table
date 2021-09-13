@@ -133,7 +133,7 @@ public class TableMeasurer<T>
         //                .measureHeight(config) + 2 * config.getColumnTitleVerticalPadding()) : 0;
 
         int titleHeight = 0;
-        
+
         // 计算列标题高度
         if (config.isShowColumnTitle())
         {

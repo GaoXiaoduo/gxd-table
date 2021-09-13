@@ -172,9 +172,6 @@ public class MatrixHelper extends Observable<TableClickObserver> implements ITou
                 boolean isDisallowIntercept = true;
                 if (Math.abs(disX) > Math.abs(disY))
                 {
-                    Log.e("MatrixHelper",
-                            "滚动 onDisallowInterceptEvent toRectLeft()：" + toRectLeft() +
-                                    "；toRectRight：" + toRectRight());
                     isHorizontalScroll = true;
                     if ((disX > 0 && toRectLeft()) || (disX < 0 && toRectRight()))
                     { //向右滑动
@@ -201,13 +198,16 @@ public class MatrixHelper extends Observable<TableClickObserver> implements ITou
                 Log.e("MatrixHelper", "滚动 onDisallowInterceptEvent --- ACTION_UP ");
                 pointMode = 0;
                 parent.requestDisallowInterceptTouchEvent(false);
+                // 判断左右边界
                 if (mScrollRangeListener != null && isHorizontalScroll)
                 {
-                    if (toRectLeft())
+                    float deltaX = Math.abs(event.getX() - mDownX);
+                    // 避免与单元格点击事件冲突，滑动距离超过100px(宽度大约为屏幕0.7厘米的宽度)才算左右滑动
+                    if (toRectLeft() && deltaX > 100)
                     {
                         mScrollRangeListener.onTableScrollToLeft();
                     }
-                    if (toRectRight())
+                    if (toRectRight() && deltaX > 100)
                     {
                         mScrollRangeListener.onTableScrollToRight();
                     }

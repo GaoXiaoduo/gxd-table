@@ -19,8 +19,24 @@ class PriceConsoleList : HttpError()
     var data: MutableList<PriceConsole>? = null
 }
 
+data class ColumnDateInfo
+(
+        /** 列名，不可更改，在Column.fillData方法内调用 */
+        var columnName: String = "",
+        /** 每列显示数据，不可更改，在Column.fillData方法内调用 */
+        var dataList: List<String>? = null,
+        /** 每列房型id */
+        var idList: List<String>? = null,
+        /** 每列显示渠道类型 */
+        var channelList: List<String>? = null,
+        /** 每列显示的日期 */
+        var dateList: List<String>? = null,
+)
+
 class PriceConsole
 {
+    var columnName = ""
+
     /** 日期 */
     @SerializedName("date")
     var date: Int = 0
