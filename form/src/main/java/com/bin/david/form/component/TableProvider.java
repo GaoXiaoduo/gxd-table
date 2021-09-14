@@ -486,31 +486,28 @@ public class TableProvider<T> implements TableClickObserver
 
         try
         {
+            //是否可以点击列表
             List<Boolean> clickEnableList = column.getClickEnableList(tableData.getT());
-
+            //是否被选中列表
             List<Boolean> selectedList = column.getSelectedList(tableData.getT());
-
             if (clickEnableList == null)
             {
                 return;
             }
             Boolean clickEnable = clickEnableList.get(row);
-
             Boolean selected = selectedList.get(row);
-            if (config.getColumnPriceCellBackgroundFormat() != null)
+            if (config.getColumnPriceCellBackgroundFormat() != null && config.getSelectedCellBackgroundFormat() != null)
             {
-                //                boolean isDrawCellBackground =
-                //                        config.getColumnPriceCellBackgroundFormat()
-                //                        .isEffectivePrice(cellInfo, col,
-                //                                row);
+                // 今日之前的方格、价格小于0的方格不可以点击，并且颜色为灰色
                 if (!clickEnable)
                 {
                     config.getColumnPriceCellBackgroundFormat().drawBackground(c, rect, cellInfo,
                             config.getPaint());
                 }
+                // 选中后的方格背景为蓝色
                 if (selected)
                 {
-                    config.getContentCellBackgroundFormat().drawBackground(c, rect, cellInfo,
+                    config.getSelectedCellBackgroundFormat().drawBackground(c, rect, cellInfo,
                             config.getPaint());
                 }
             }

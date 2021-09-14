@@ -223,6 +223,13 @@ public class TableConfig
      */
     private PriceCellBackgroundFormat<CellInfo> columnPriceCellBackgroundFormat;
 
+
+    /**
+     * 选中内容格子进行背景格式化
+     */
+    private ICellBackgroundFormat<CellInfo> selectedCellBackgroundFormat;
+
+
     /**
      * 左上角日历背景
      */
@@ -733,6 +740,31 @@ public class TableConfig
     {
 
         this.columnPriceCellBackgroundFormat = columnPriceCellBackgroundFormat;
+        return this;
+    }
+
+    /**
+     * 获选中格子背景格式化
+     *
+     * @return
+     */
+    public ICellBackgroundFormat<CellInfo> getSelectedCellBackgroundFormat ()
+    {
+
+        return selectedCellBackgroundFormat;
+    }
+
+    /**
+     * 设置选中格子背景格式化
+     *
+     * @param selectedCellBackgroundFormat 选中格子背景格式化
+     *
+     * @return
+     */
+    public TableConfig setSelectedCellBackgroundFormat (ICellBackgroundFormat<CellInfo> selectedCellBackgroundFormat)
+    {
+
+        this.selectedCellBackgroundFormat = selectedCellBackgroundFormat;
         return this;
     }
 

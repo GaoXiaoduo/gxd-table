@@ -278,13 +278,12 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
         // 设置左上角日期标题字体样式
         mBinding.table.config.calendarTitleStyle = FontStyle(this, 14, ContextCompat.getColor(this, R.color.table_calendar_text_color)).setAlign(Paint.Align.CENTER)
 
-        // 设置列背景
+        // 设置内容方格价格无效背景颜色(灰色)
         mBinding.table.config.columnPriceCellBackgroundFormat = object : PriceCellBackgroundFormat<CellInfo<*>>()
         {
             override fun getBackGroundColor(column: CellInfo<*>): Int
             {
-                //  ContextCompat.getColor(this@MainActivity, R.color.table_cell_no_price_bg_color
-                return ContextCompat.getColor(this@MainActivity, R.color.table_cell_no_price_bg_color) //TableConfig.INVALID_COLOR
+                return ContextCompat.getColor(this@MainActivity, R.color.table_cell_no_price_bg_color)
             }
 
             override fun getTextColor(column: CellInfo<*>): Int
@@ -294,48 +293,15 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
 
             override fun isEffectivePrice(cellInfo: CellInfo<*>, col: Int, row: Int): Boolean
             {
-                //                Log.d(TAG, "背景  isEffectivePrice ---------------------------- ")
-                //                val list = mTableData?.t
-                //                //Log.e(TAG, "背景 list:${list.toString()}")
-                //                Log.e(TAG, "背景 列:$col,行:$row")
-                //                //Log.e(TAG, "背景 cellInfo:$cellInfo")
-                //                if (col >= 3)
-                //                {
-                //                    val colInfo = list!![col - 3] as ColumnDateInfo
-                //
-                //                    val rowString = colInfo.dataList?.get(row)
-                //                    val idString = colInfo.idList?.get(row)
-                //                    val channelString = colInfo.channelList?.get(row)
-                //                    val dateString = colInfo.dateList?.get(row)
-                //                    val priceString = colInfo.priceList?.get(0)
-                //                    Log.e(TAG, "背景 dateString:$dateString,priceString:$priceString")
-                //                    // 灰色 没关联渠道，用【¥--】表示、今日前都为灰色、灰色不可以点击、今日之后有价格并且大于0，为白色，才可以点击
-                //                    //                    if (priceString == null || priceString <= 0)
-                //                    //                    {
-                //                    //                        return true
-                //                    //                    }
-                //                    if (col > 5)
-                //                    {
-                //                        return true
-                //                    } else
-                //                    {
-                //                        return false
-                //                    }
-                //                }
                 return false
             }
 
         }
-        // 设置列背景
-        mBinding.table.config.contentCellBackgroundFormat = object : BaseCellBackgroundFormat<CellInfo<*>>()
+        // 设置内容方格选中时的背景颜色(蓝色色)
+        mBinding.table.config.selectedCellBackgroundFormat = object : BaseCellBackgroundFormat<CellInfo<*>>()
         {
             override fun getBackGroundColor(cellInfo: CellInfo<*>): Int
             {
-                //                return if (cellInfo.row % 2 == 0)
-                //                {
-                //                    ContextCompat.getColor(this@MainActivity, R.color.y_color_bar_1)
-                //                } else TableConfig.INVALID_COLOR
-
                 return ContextCompat.getColor(this@MainActivity, R.color.table_cell_selected_bg_color)
             }
         }
@@ -347,7 +313,6 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
     {
         // 单元格点击事件
         mTableData?.onItemClickListener = TableData.OnItemClickListener<String> { column, value, info, col, row ->
-            // Log.d(TAG, "点击事件 列:$col,行:$row,数据：$value,T:${info.toString()}")
             val list = mTableData?.t
             for (i: Int in list!!.indices)
             {
@@ -364,14 +329,8 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
                     if (clickEnable!!)
                     {
                         Log.e(TAG, "点击事件 列:$col,行:$row,clickEnable:$clickEnable")
-                        //                        val paint = Paint()
-                        //                        paint!!.strokeWidth = 10f
-                        //                        paint.color = Color.RED
-                        //                        canvas!!.drawRect(0f, 0f, 200f, 400f, paint)
-
                         colInfo.selectedList?.set(row, !selected!!)
                     }
-                    //Log.e(TAG, "点击事件 列:$col,行:$row,col数据：$col,rowString:$rowString")
                     //Log.e(TAG, "点击事件 列:$col,行:$row,rowString:$rowString,idString：$idString,channelString：$channelString,dateString：$dateString")
                     break
                 }
@@ -385,15 +344,6 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
             Log.e(TAG, "点击事件 点击日历：${it},")
         }
     }
-
-
-    //
-    //    private fun setColumnsStyle()
-    //    {
-    //        val houseNameColumn = mBinding.table.tableData.getColumnByFieldName("houseName")
-    //        houseNameColumn.isFixed = true
-    //    }
-
 
     private fun getYColorBar(): IntArray
     {
@@ -602,11 +552,6 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
             return false
         }
         return true
-    }
-
-    private fun test()
-    {
-
     }
 
     //    .setColumnCellBackgroundFormat(new BaseCellBackgroundFormat<Column>() {
