@@ -11,6 +11,7 @@ import com.bin.david.form.data.format.count.StringCountFormat;
 import com.bin.david.form.data.format.draw.FastTextDrawFormat;
 import com.bin.david.form.data.format.draw.IDrawFormat;
 import com.bin.david.form.data.format.draw.MultiLineDrawFormat;
+import com.bin.david.form.data.format.draw.SelectedTextDrawFormat;
 import com.bin.david.form.data.format.draw.TextDrawFormat;
 import com.bin.david.form.listener.OnColumnItemClickListener;
 import com.bin.david.form.utils.LetterUtils;
@@ -43,6 +44,11 @@ public class Column<T> implements Comparable<Column>
     private IFormat<T> format;
 
     private IDrawFormat<T> drawFormat;
+
+    /**
+     * 画选中的方格文字
+     */
+    private IDrawFormat<T> drawSelectedFormat;
 
     private String fieldName;
 
@@ -278,6 +284,31 @@ public class Column<T> implements Comparable<Column>
     {
 
         this.drawFormat = drawFormat;
+    }
+
+    /**
+     * 获取绘制格式化
+     *
+     * @return 绘制格式化
+     */
+    public IDrawFormat<T> getDrawSelectedFormat ()
+    {
+
+        if (drawSelectedFormat == null)
+        {
+            drawSelectedFormat = isFast ? new FastTextDrawFormat<T>() :
+                    new SelectedTextDrawFormat<T>();
+        }
+        return drawSelectedFormat;
+    }
+
+    /**
+     * 设置选中绘制格式化
+     */
+    public void setDrawSelectedFormat (IDrawFormat<T> drawSelectedFormat)
+    {
+
+        this.drawSelectedFormat = drawSelectedFormat;
     }
 
     /**

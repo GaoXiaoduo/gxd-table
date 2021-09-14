@@ -480,18 +480,32 @@ public class TableProvider<T> implements TableClickObserver
     }
 
     protected void drawContentCellBackground (
-            Column column, Canvas c, CellInfo<T> cellInfo, Rect rect
-            , int col, int row)
+            Column column, Canvas c, CellInfo<T> cellInfo, Rect rect, int col, int row)
     {
 
         try
         {
+
+            //画彩条
+            if (column.isColorBar())
+            {
+                new BaseBackgroundFormat(Integer.valueOf(cellInfo.value)).drawBackground(c,
+                        rect,
+                        config.getPaint());
+            }
             //是否可以点击列表
             List<Boolean> clickEnableList = column.getClickEnableList(tableData.getT());
             //是否被选中列表
             List<Boolean> selectedList = column.getSelectedList(tableData.getT());
             if (clickEnableList == null)
             {
+                //画非彩条的固定列文字
+                if (!column.isColorBar())
+                {
+                    rect.left += config.getTextLeftOffset();
+                    cellInfo.column.getDrawFormat().draw(c, rect, cellInfo,
+                            config);
+                }
                 return;
             }
             Boolean clickEnable = clickEnableList.get(row);
@@ -504,11 +518,34 @@ public class TableProvider<T> implements TableClickObserver
                     config.getColumnPriceCellBackgroundFormat().drawBackground(c, rect, cellInfo,
                             config.getPaint());
                 }
-                // 选中后的方格背景为蓝色
+                // 选中后的方格背景为蓝色、文字为白色
                 if (selected)
                 {
-                    config.getSelectedCellBackgroundFormat().drawBackground(c, rect, cellInfo,
-                            config.getPaint());
+                    if (!column.isColorBar())
+                    {
+                        config.getSelectedCellBackgroundFormat().drawBackground(c, rect, cellInfo,
+                                config.getPaint());
+                        int textColor =
+                                config.getSelectedCellBackgroundFormat().getTextColor(cellInfo);
+                        if (textColor != TableConfig.INVALID_COLOR)
+                        {
+                            config.getContentGridStyle().fillPaint(config.getPaint());
+                            config.getPaint().setColor(textColor);
+                        }
+                        rect.left += config.getTextLeftOffset();
+                        cellInfo.column.getDrawSelectedFormat().draw(c, rect, cellInfo, config);
+                    }
+                }
+                else
+                {
+                    //画非彩条、非固定列文字
+                    if (!column.isColorBar())
+                    {
+                        rect.left += config.getTextLeftOffset();
+                        cellInfo.column.getDrawFormat().draw(c, rect,
+                                cellInfo,
+                                config);
+                    }
                 }
             }
         } catch (NoSuchFieldException e)
@@ -542,20 +579,22 @@ public class TableProvider<T> implements TableClickObserver
         if (config.getTableGridFormat() != null)
         {
             config.getContentGridStyle().fillPaint(config.getPaint());
-            config.getTableGridFormat().drawContentGrid(c, cellInfo.col, cellInfo.row, rect,
+            config.getTableGridFormat().drawContentGrid(c, cellInfo.col, cellInfo.row,
+                    rect,
                     cellInfo, config.getPaint());
         }
-
-        if (isColorBar)
-        {
-            new BaseBackgroundFormat(Integer.valueOf(cellInfo.value)).drawBackground(c, rect,
-                    config.getPaint());
-        }
-        else
-        {
-            rect.left += config.getTextLeftOffset();
-            cellInfo.column.getDrawFormat().draw(c, rect, cellInfo, config);
-        }
+        //
+        //        if (isColorBar)
+        //        {
+        //            new BaseBackgroundFormat(Integer.valueOf(cellInfo.value)).drawBackground(c,
+        //                    rect,
+        //                    config.getPaint());
+        //        }
+        //        else
+        //        {
+        //            rect.left += config.getTextLeftOffset();
+        //            cellInfo.column.getDrawFormat().draw(c, rect, cellInfo, config);
+        //        }
     }
 
     /**
