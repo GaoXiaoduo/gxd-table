@@ -450,9 +450,9 @@ public class TableProvider<T> implements TableClickObserver
                                 }
                                 operation.checkSelectedPoint(i, j, correctCellRect);
                                 cellInfo.set(column, data, value, i, j);
+                                drawContentCellBackground(column, canvas, cellInfo, tempRect, i, j);
                                 drawContentCell(canvas, cellInfo, correctCellRect,
                                         column.isColorBar(), config);
-
                             }
                         }
                         else
@@ -479,6 +479,50 @@ public class TableProvider<T> implements TableClickObserver
         }
     }
 
+    protected void drawContentCellBackground (
+            Column column, Canvas c, CellInfo<T> cellInfo, Rect rect
+            , int col, int row)
+    {
+
+        try
+        {
+            List<Boolean> clickEnableList = column.getClickEnableList(tableData.getT());
+
+            List<Boolean> selectedList = column.getSelectedList(tableData.getT());
+
+            if (clickEnableList == null)
+            {
+                return;
+            }
+            Boolean clickEnable = clickEnableList.get(row);
+
+            Boolean selected = selectedList.get(row);
+            if (config.getColumnPriceCellBackgroundFormat() != null)
+            {
+                //                boolean isDrawCellBackground =
+                //                        config.getColumnPriceCellBackgroundFormat()
+                //                        .isEffectivePrice(cellInfo, col,
+                //                                row);
+                if (!clickEnable)
+                {
+                    config.getColumnPriceCellBackgroundFormat().drawBackground(c, rect, cellInfo,
+                            config.getPaint());
+                }
+                if (selected)
+                {
+                    config.getContentCellBackgroundFormat().drawBackground(c, rect, cellInfo,
+                            config.getPaint());
+                }
+            }
+        } catch (NoSuchFieldException e)
+        {
+            e.printStackTrace();
+        } catch (IllegalAccessException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
     /**
      * 绘制内容格子
      *
@@ -492,11 +536,12 @@ public class TableProvider<T> implements TableClickObserver
             TableConfig config)
     {
 
-        if (config.getContentCellBackgroundFormat() != null)
-        {
-            config.getContentCellBackgroundFormat().drawBackground(c, rect, cellInfo,
-                    config.getPaint());
-        }
+
+        //        if (config.getContentCellBackgroundFormat() != null)
+        //        {
+        //            config.getContentCellBackgroundFormat().drawBackground(c, rect, cellInfo,
+        //                    config.getPaint());
+        //        }
         if (config.getTableGridFormat() != null)
         {
             config.getContentGridStyle().fillPaint(config.getPaint());

@@ -6,6 +6,7 @@ import com.bin.david.form.data.CellInfo;
 import com.bin.david.form.data.column.Column;
 import com.bin.david.form.data.format.bg.IBackgroundFormat;
 import com.bin.david.form.data.format.bg.ICellBackgroundFormat;
+import com.bin.david.form.data.format.bg.PriceCellBackgroundFormat;
 import com.bin.david.form.data.format.draw.IDrawFormat;
 import com.bin.david.form.data.format.draw.LeftTopDrawFormat;
 import com.bin.david.form.data.format.grid.IGridFormat;
@@ -99,7 +100,7 @@ public class TableConfig
     /**
      * 上下padding(为了表格的美观，暂只支持统一的padding)
      */
-    private int verticalPadding = 10;
+    private int verticalPadding = 15;
 
     /**
      * 增加列序列上下padding
@@ -216,6 +217,11 @@ public class TableConfig
      * 统计行格子背景格式化
      */
     private ICellBackgroundFormat<Column> countBgCellFormat;
+
+    /**
+     * 价格格子背景格式化
+     */
+    private PriceCellBackgroundFormat<CellInfo> columnPriceCellBackgroundFormat;
 
     /**
      * 左上角日历背景
@@ -702,6 +708,31 @@ public class TableConfig
     {
 
         this.columnCellBackgroundFormat = columnCellBackgroundFormat;
+        return this;
+    }
+
+    /**
+     * 获取价格格子背景格式化
+     *
+     * @return
+     */
+    public PriceCellBackgroundFormat<CellInfo> getColumnPriceCellBackgroundFormat ()
+    {
+
+        return columnPriceCellBackgroundFormat;
+    }
+
+    /**
+     * 设置价格格子背景格式化
+     *
+     * @param columnPriceCellBackgroundFormat
+     *
+     * @return
+     */
+    public TableConfig setColumnPriceCellBackgroundFormat (PriceCellBackgroundFormat<CellInfo> columnPriceCellBackgroundFormat)
+    {
+
+        this.columnPriceCellBackgroundFormat = columnPriceCellBackgroundFormat;
         return this;
     }
 

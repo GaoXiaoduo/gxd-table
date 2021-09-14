@@ -399,6 +399,58 @@ public class Column<T> implements Comparable<Column>
         }
     }
 
+    public List<Boolean> getClickEnableList (List<T> objects) throws NoSuchFieldException,
+                                                                     IllegalAccessException
+    {
+
+        List<Boolean> clickEnableList = new ArrayList<>();
+        int size = objects.size();
+        if (size > 0)
+        {
+            for (int k = 0; k < size; k++)
+            {
+                Object child = objects.get(k);
+                Class childClazz = child.getClass();
+                Field columnNameField = childClazz.getDeclaredField("columnName");
+                columnNameField.setAccessible(true);
+                if ((String) columnNameField.get(child) == fieldName)
+                {
+                    Field dataListField = childClazz.getDeclaredField("clickEnableList");
+                    dataListField.setAccessible(true);
+                    clickEnableList = (List<Boolean>) dataListField.get(child);
+                    break;
+                }
+            }
+        }
+        return clickEnableList;
+    }
+
+    public List<Boolean> getSelectedList (List<T> objects) throws NoSuchFieldException,
+                                                                  IllegalAccessException
+    {
+
+        List<Boolean> clickEnableList = new ArrayList<>();
+        int size = objects.size();
+        if (size > 0)
+        {
+            for (int k = 0; k < size; k++)
+            {
+                Object child = objects.get(k);
+                Class childClazz = child.getClass();
+                Field columnNameField = childClazz.getDeclaredField("columnName");
+                columnNameField.setAccessible(true);
+                if ((String) columnNameField.get(child) == fieldName)
+                {
+                    Field dataListField = childClazz.getDeclaredField("selectedList");
+                    dataListField.setAccessible(true);
+                    clickEnableList = (List<Boolean>) dataListField.get(child);
+                    break;
+                }
+            }
+        }
+        return clickEnableList;
+    }
+
 
     /**
      * 填充数据

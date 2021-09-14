@@ -31,6 +31,12 @@ data class ColumnDateInfo
         var channelList: List<String>? = null,
         /** 每列显示的日期 */
         var dateList: List<String>? = null,
+        /** 每列显示的价格 */
+        var priceList: List<Int>? = null,
+        /** 每个单元格是否可以点击 */
+        var clickEnableList: List<Boolean>? = null,
+        /** 每个单元格是否选中 */
+        var selectedList: MutableList<Boolean>? = null
 )
 
 class PriceConsole

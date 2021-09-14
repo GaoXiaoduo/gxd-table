@@ -16,4 +16,6 @@
 
     <color name="table_calendar_text_color">#F38C27</color>
 
+    <color name="table_cell_no_price_bg_color">#F1F1F1</color>
+    <color name="table_cell_selected_bg_color">#3494FF</color>
 </resources>

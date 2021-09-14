@@ -10,8 +10,12 @@ import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import com.bin.david.form.core.TableConfig
+import com.bin.david.form.data.CellInfo
 import com.bin.david.form.data.column.Column
 import com.bin.david.form.data.format.bg.BaseBackgroundFormat
+import com.bin.david.form.data.format.bg.BaseCellBackgroundFormat
+import com.bin.david.form.data.format.bg.PriceCellBackgroundFormat
 import com.bin.david.form.data.format.draw.CalendarTextImageDrawFormat
 import com.bin.david.form.data.format.draw.ImageResDrawFormat
 import com.bin.david.form.data.format.draw.MultiLineDrawFormat
@@ -183,6 +187,9 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
             var idList = ArrayList<String>()
             var channelList = ArrayList<String>()
             var dateList = ArrayList<String>()
+            var priceList = ArrayList<Int>()
+            var clickEnableList = ArrayList<Boolean>()
+            var selectedList = ArrayList<Boolean>()
             for (j: Int in productList.indices)
             {
                 val product = productList[j]
@@ -207,18 +214,22 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
                     idList.add(product.id)
                     channelList.add(channelData.channel.toString())
                     dateList.add("${info.date}")
+                    channelData.price?.let { priceList.add(it) }
+                    val clickEnable: Boolean = isClickEnable(channelData.price, info.date)
+                    clickEnableList.add(clickEnable)
+                    selectedList.add(false)
                 }
             }
             val fieldName = "dateCompose_${info.date}"
             val column = Column<PriceConsole>(info.dateCompose, fieldName, MultiLineDrawFormat<PriceConsole>(mDateWidth))
             column.isToday = info.date == 20210912
-            mDataList.add(ColumnDateInfo(fieldName, priceDataList, idList, channelList, dateList))
+            mDataList.add(ColumnDateInfo(fieldName, priceDataList, idList, channelList, dateList, priceList, clickEnableList, selectedList))
             mColumnList.add(column)
         }
 
-        mDataList.add(ColumnDateInfo(colorColumnName, colorList, null, null, null))
-        mDataList.add(ColumnDateInfo(houseColumnName, houseNameList, null, null, null))
-        mDataList.add(ColumnDateInfo(channelColumnName, channelDataList, null, null, null))
+        mDataList.add(ColumnDateInfo(colorColumnName, colorList, null, null, null, null))
+        mDataList.add(ColumnDateInfo(houseColumnName, houseNameList, null, null, null, null))
+        mDataList.add(ColumnDateInfo(channelColumnName, channelDataList, null, null, null, null))
 
         mTableData = TableData<ColumnDateInfo>("房价表", mDataList, mColumnList as List<Column<PriceConsole>>)
 
@@ -266,68 +277,77 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
                 R.mipmap.ic_room_price_date_bg, R.color.date_text_color)
         // 设置左上角日期标题字体样式
         mBinding.table.config.calendarTitleStyle = FontStyle(this, 14, ContextCompat.getColor(this, R.color.table_calendar_text_color)).setAlign(Paint.Align.CENTER)
-        // 设置网格线
-        //        mBinding.table.config.tableGridFormat =
-        //                object : BaseAbstractGridFormat()
-        //                {
-        //
-        //                    override fun isShowVerticalLine(col: Int, row: Int, cellInfo: CellInfo<*>): Boolean
-        //                    {
-        //                        return true //col % 2 == 0
-        //                    }
-        //
-        //                    override fun isShowHorizontalLine(col: Int, row: Int, cellInfo: CellInfo<*>): Boolean
-        //                    {
-        //                        return true //row % 2 == 0
-        //                    }
-        //
-        //                    override fun isShowColumnTitleVerticalLine(col: Int, column: Column<*>): Boolean
-        //                    {
-        //                        Log.d(TAG, "网格线 垂直 列:$col,column:${column?.columnName},width:${column?.width},computeWidth:${column?.computeWidth}")
-        //
-        //                        if (col == 0 || col == 1)
-        //                        {
-        //                            return false
-        //                        }
-        //                        return true
-        //                    }
-        //
-        //                    override fun isShowColumnTitleHorizontalLine(col: Int, column: Column<*>): Boolean
-        //                    {
-        //                        // Log.d(TAG, "网格线 水平 列:$col,column:${column?.columnName}")
-        //
-        //                        if (col == 0 || col == 1 || col == 2)
-        //                        {
-        //                            return false
-        //                        }
-        //                        return true
-        //                    }
-        //
-        //
-        //                    //            override fun drawTableBorderGrid(canvas: Canvas?, left: Int, top: Int, right: Int, bottom: Int, paint: Paint?)
-        //                    //            {
-        //                    //                //                paint!!.strokeWidth = 10f
-        //                    //                //                paint.color = Color.GREEN
-        //                    //                //                canvas!!.drawRect(left.toFloat(), top.toFloat(), right.toFloat(), bottom.toFloat(), paint)
-        //                    //            }
-        //                    //
-        //                    override fun drawColumnTitleGrid(canvas: Canvas?, rect: Rect?, column: Column<*>, col: Int, paint: Paint?)
-        //                    {
-        //                        super.drawColumnTitleGrid(canvas, rect, column, col, paint)
-        //                        //                        paint!!.strokeWidth = 10f
-        //                        //                        paint.color = Color.RED
-        //                        //                        canvas!!.drawRect(0f, 0f, 200f, 400f, paint)
-        //                    }
-        //                }
 
+        // 设置列背景
+        mBinding.table.config.columnPriceCellBackgroundFormat = object : PriceCellBackgroundFormat<CellInfo<*>>()
+        {
+            override fun getBackGroundColor(column: CellInfo<*>): Int
+            {
+                //  ContextCompat.getColor(this@MainActivity, R.color.table_cell_no_price_bg_color
+                return ContextCompat.getColor(this@MainActivity, R.color.table_cell_no_price_bg_color) //TableConfig.INVALID_COLOR
+            }
+
+            override fun getTextColor(column: CellInfo<*>): Int
+            {
+                return TableConfig.INVALID_COLOR
+            }
+
+            override fun isEffectivePrice(cellInfo: CellInfo<*>, col: Int, row: Int): Boolean
+            {
+                //                Log.d(TAG, "背景  isEffectivePrice ---------------------------- ")
+                //                val list = mTableData?.t
+                //                //Log.e(TAG, "背景 list:${list.toString()}")
+                //                Log.e(TAG, "背景 列:$col,行:$row")
+                //                //Log.e(TAG, "背景 cellInfo:$cellInfo")
+                //                if (col >= 3)
+                //                {
+                //                    val colInfo = list!![col - 3] as ColumnDateInfo
+                //
+                //                    val rowString = colInfo.dataList?.get(row)
+                //                    val idString = colInfo.idList?.get(row)
+                //                    val channelString = colInfo.channelList?.get(row)
+                //                    val dateString = colInfo.dateList?.get(row)
+                //                    val priceString = colInfo.priceList?.get(0)
+                //                    Log.e(TAG, "背景 dateString:$dateString,priceString:$priceString")
+                //                    // 灰色 没关联渠道，用【¥--】表示、今日前都为灰色、灰色不可以点击、今日之后有价格并且大于0，为白色，才可以点击
+                //                    //                    if (priceString == null || priceString <= 0)
+                //                    //                    {
+                //                    //                        return true
+                //                    //                    }
+                //                    if (col > 5)
+                //                    {
+                //                        return true
+                //                    } else
+                //                    {
+                //                        return false
+                //                    }
+                //                }
+                return false
+            }
+
+        }
+        // 设置列背景
+        mBinding.table.config.contentCellBackgroundFormat = object : BaseCellBackgroundFormat<CellInfo<*>>()
+        {
+            override fun getBackGroundColor(cellInfo: CellInfo<*>): Int
+            {
+                //                return if (cellInfo.row % 2 == 0)
+                //                {
+                //                    ContextCompat.getColor(this@MainActivity, R.color.y_color_bar_1)
+                //                } else TableConfig.INVALID_COLOR
+
+                return ContextCompat.getColor(this@MainActivity, R.color.table_cell_selected_bg_color)
+            }
+        }
     }
 
+    // private val mSelectedCellList: MutableList<>
 
     private fun tableClick()
     {
         // 单元格点击事件
         mTableData?.onItemClickListener = TableData.OnItemClickListener<String> { column, value, info, col, row ->
-            Log.d(TAG, "点击事件 列:$col,行:$row,数据：$value,T:${info.toString()}")
+            // Log.d(TAG, "点击事件 列:$col,行:$row,数据：$value,T:${info.toString()}")
             val list = mTableData?.t
             for (i: Int in list!!.indices)
             {
@@ -338,11 +358,25 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
                     val idString = colInfo.idList?.get(row)
                     val channelString = colInfo.channelList?.get(row)
                     val dateString = colInfo.dateList?.get(row)
+                    val clickEnable = colInfo.clickEnableList?.get(row)
+                    var selected = colInfo.selectedList?.get(row)
+                    var selectedList = colInfo.selectedList
+                    if (clickEnable!!)
+                    {
+                        Log.e(TAG, "点击事件 列:$col,行:$row,clickEnable:$clickEnable")
+                        //                        val paint = Paint()
+                        //                        paint!!.strokeWidth = 10f
+                        //                        paint.color = Color.RED
+                        //                        canvas!!.drawRect(0f, 0f, 200f, 400f, paint)
+
+                        colInfo.selectedList?.set(row, !selected!!)
+                    }
                     //Log.e(TAG, "点击事件 列:$col,行:$row,col数据：$col,rowString:$rowString")
-                    Log.e(TAG, "点击事件 列:$col,行:$row,rowString:$rowString,idString：$idString,channelString：$channelString,dateString：$dateString")
+                    //Log.e(TAG, "点击事件 列:$col,行:$row,rowString:$rowString,idString：$idString,channelString：$channelString,dateString：$dateString")
                     break
                 }
             }
+            mBinding.table.invalidate()
         }
         // 左右滑动边界回调事件
         mBinding.table.onTableScrollRangeListener = this
@@ -437,6 +471,9 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
             var idList = ArrayList<String>()
             var channelList = ArrayList<String>()
             var dateList = ArrayList<String>()
+            var priceList = ArrayList<Int>()
+            var clickEnableList = ArrayList<Boolean>()
+            var selectedList = ArrayList<Boolean>()
             for (j: Int in productList.indices)
             {
                 val product = productList[j]
@@ -461,11 +498,15 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
                     idList.add(product.id)
                     channelList.add(channelData.channel.toString())
                     dateList.add("${info.date}")
+                    channelData.price?.let { priceList.add(it) }
+                    val clickEnable: Boolean = isClickEnable(channelData.price, info.date)
+                    clickEnableList.add(clickEnable)
+                    selectedList.add(false)
                 }
             }
             val fieldName = "dateCompose_${info.date}_1"
             val column = Column<PriceConsole>(info.dateCompose, fieldName, MultiLineDrawFormat<PriceConsole>(mDateWidth))
-            tmpDataList.add(ColumnDateInfo(fieldName, priceDataList, idList, channelList, dateList))
+            tmpDataList.add(ColumnDateInfo(fieldName, priceDataList, idList, channelList, dateList, priceList, clickEnableList, selectedList))
             tmpColumnList.add(column)
         }
 
@@ -499,6 +540,9 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
             var idList = ArrayList<String>()
             var channelList = ArrayList<String>()
             var dateList = ArrayList<String>()
+            var priceList = ArrayList<Int>()
+            var clickEnableList = ArrayList<Boolean>()
+            var selectedList = ArrayList<Boolean>()
             for (j: Int in productList.indices)
             {
                 val product = productList[j]
@@ -523,11 +567,15 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
                     idList.add(product.id)
                     channelList.add(channelData.channel.toString())
                     dateList.add("${info.date}")
+                    channelData.price?.let { priceList.add(it) }
+                    val clickEnable: Boolean = isClickEnable(channelData.price, info.date)
+                    clickEnableList.add(clickEnable)
+                    selectedList.add(false)
                 }
             }
             val fieldName = "dateCompose_${info.date}_2"
             val column = Column<PriceConsole>(info.dateCompose, fieldName, MultiLineDrawFormat<PriceConsole>(mDateWidth))
-            tmpDataList.add(ColumnDateInfo(fieldName, priceDataList, idList, channelList, dateList))
+            tmpDataList.add(ColumnDateInfo(fieldName, priceDataList, idList, channelList, dateList, priceList, clickEnableList, selectedList))
             tmpColumnList.add(column)
         }
 
@@ -539,10 +587,99 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
         mTableData?.calendarText = "2021-09-13"
     }
 
+    private fun isClickEnable(price: Int?, date: Int): Boolean
+    {
+        val today = LocalDate.now()
+        val dateFormate = DateTimeFormatter.ofPattern("yyyyMMdd")
+        val todayInt = dateFormate.format(today)
+                .toInt()
+        if (date < todayInt)
+        {
+            return false
+        }
+        if (price == null || price == 0)
+        {
+            return false
+        }
+        return true
+    }
+
     private fun test()
     {
 
     }
+
+    //    .setColumnCellBackgroundFormat(new BaseCellBackgroundFormat<Column>() {
+    //            @Override
+    //            public int getBackGroundColor(Column column) {
+    //                if("area".equals(column.getFieldName())) {
+    //                    return ContextCompat.getColor(NetHttpActivity.this,R.color.column_bg);
+    //                }
+    //                return TableConfig.INVALID_COLOR;
+    //            }
+    //            @Override
+    //            public int getTextColor(Column column) {
+    //                if("area".equals(column.getFieldName())) {
+    //                    return ContextCompat.getColor(NetHttpActivity.this, R.color.white);
+    //                }else{
+    //                    return TableConfig.INVALID_COLOR;
+    //                }
+    //            }
+    //        });
+
+    // 设置网格线
+    //        mBinding.table.config.tableGridFormat =
+    //                object : BaseAbstractGridFormat()
+    //                {
+    //
+    //                    override fun isShowVerticalLine(col: Int, row: Int, cellInfo: CellInfo<*>): Boolean
+    //                    {
+    //                        return true //col % 2 == 0
+    //                    }
+    //
+    //                    override fun isShowHorizontalLine(col: Int, row: Int, cellInfo: CellInfo<*>): Boolean
+    //                    {
+    //                        return true //row % 2 == 0
+    //                    }
+    //
+    //                    override fun isShowColumnTitleVerticalLine(col: Int, column: Column<*>): Boolean
+    //                    {
+    //                        Log.d(TAG, "网格线 垂直 列:$col,column:${column?.columnName},width:${column?.width},computeWidth:${column?.computeWidth}")
+    //
+    //                        if (col == 0 || col == 1)
+    //                        {
+    //                            return false
+    //                        }
+    //                        return true
+    //                    }
+    //
+    //                    override fun isShowColumnTitleHorizontalLine(col: Int, column: Column<*>): Boolean
+    //                    {
+    //                        // Log.d(TAG, "网格线 水平 列:$col,column:${column?.columnName}")
+    //
+    //                        if (col == 0 || col == 1 || col == 2)
+    //                        {
+    //                            return false
+    //                        }
+    //                        return true
+    //                    }
+    //
+    //
+    //                    //            override fun drawTableBorderGrid(canvas: Canvas?, left: Int, top: Int, right: Int, bottom: Int, paint: Paint?)
+    //                    //            {
+    //                    //                //                paint!!.strokeWidth = 10f
+    //                    //                //                paint.color = Color.GREEN
+    //                    //                //                canvas!!.drawRect(left.toFloat(), top.toFloat(), right.toFloat(), bottom.toFloat(), paint)
+    //                    //            }
+    //                    //
+    //                    override fun drawColumnTitleGrid(canvas: Canvas?, rect: Rect?, column: Column<*>, col: Int, paint: Paint?)
+    //                    {
+    //                        super.drawColumnTitleGrid(canvas, rect, column, col, paint)
+    //                        //                        paint!!.strokeWidth = 10f
+    //                        //                        paint.color = Color.RED
+    //                        //                        canvas!!.drawRect(0f, 0f, 200f, 400f, paint)
+    //                    }
+    //                }
 
 
     companion object
