@@ -4,8 +4,6 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -45,13 +43,21 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
 
     private val mBinding get() = _binding!!
 
-    private val mHandler = Handler(Looper.myLooper()!!)
+    /** 彩条列名称 */
+    private var mColorColumnName: String = "color"
 
+    /** 房型列名称 */
+    private var mHouseColumnName: String = "houseName"
+
+    /** 渠道列名称 */
+    private var mChannelColumnName: String = "channel"
+
+    /** 表格数据 */
     var mTableData: TableData<ColumnDateInfo>? = null
-
 
     var mColumnList = mutableListOf<Column<PriceConsole>>()
 
+    /** 彩条颜色数组 */
     var mColorBarArray: IntArray? = null
 
     var mDateWidth: Int = 0
@@ -61,7 +67,7 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
      */
     private var mPriceList: MutableList<PriceConsole> = mutableListOf()
 
-    var mDataList: MutableList<ColumnDateInfo> = mutableListOf()
+    private var mDataList: MutableList<ColumnDateInfo> = mutableListOf()
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
@@ -90,6 +96,7 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
     private fun initTable()
     {
         mColorBarArray = getYColorBar()
+        initFixedColumn()
         initData()
         initCalendar()
         initTableConfig()
@@ -97,22 +104,23 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
     }
 
 
-    private fun initData()
+    /**
+     * 初始化固定列
+     */
+    private fun initFixedColumn()
     {
-        var colorColumnName = "color"
-        var houseColumnName = "houseName"
-        var channelColumnName = "channel"
-        val colorColumn = Column<PriceConsole>("", colorColumnName, MultiLineDrawFormat<PriceConsole>(1))
+        // 设置彩条列属性
+        val colorColumn = Column<PriceConsole>("", mColorColumnName, MultiLineDrawFormat<PriceConsole>(1))
         colorColumn.isFixed = false
         colorColumn.isAutoMerge = true
         colorColumn.isColorBar = true
-        // colorColumn.width = 1
-
-        val houseNameColumn = Column<PriceConsole>("房型", houseColumnName, MultiLineDrawFormat<PriceConsole>(200))
+        // 设置房型名称列属性
+        val houseNameColumn = Column<PriceConsole>("房型", mHouseColumnName, MultiLineDrawFormat<PriceConsole>(200))
         houseNameColumn.isFixed = false
         houseNameColumn.isAutoMerge = true
+        // 设置渠道列属性
         val channelIconWidth = DensityUtils.dp2px(this@MainActivity, 23f)
-        val channelColumn = Column<String>("渠道", channelColumnName, object : ImageResDrawFormat<String>(channelIconWidth, channelIconWidth)
+        val channelColumn = Column<String>("渠道", mChannelColumnName, object : ImageResDrawFormat<String>(channelIconWidth, channelIconWidth)
         {
             override fun getContext(): Context
             {
@@ -126,18 +134,18 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
             }
         })
         channelColumn.isFixed = false
-
+        // 设置日历列属性（包含彩条、房型、渠道3个子列）
         val calendarColumn = Column<PriceConsole>("日历", colorColumn, houseNameColumn, channelColumn) // MultiLineDrawFormat<PriceConsole>(140)) // houseNameColumn) //, channelColumn)
         calendarColumn.isFixed = true
-
         mColumnList.add(calendarColumn)
+    }
 
-        var priceColumns = mutableListOf<Column<PriceConsole>>()
+    private fun initData()
+    {
         // 列数
         val colorList = ArrayList<String>()
         val houseNameList = ArrayList<String>()
         val channelDataList = ArrayList<String>()
-
 
         for (i: Int in mPriceList.indices)
         {
@@ -147,7 +155,7 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
                     .toDate()
             info.dateCompose = "${week}\n${date}"
 
-            val productList: List<ProductPrice>? = info.productPrices
+            val productList: MutableList<ProductPrice>? = info.productPrices
             if (productList.isNullOrEmpty())
             {
                 return
@@ -174,58 +182,37 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
                     }
                 }
             }
-
-            val priceDataList = ArrayList<String>()
-            var idList = ArrayList<String>()
-            var channelList = ArrayList<String>()
-            var dateList = ArrayList<String>()
-            var priceList = ArrayList<Int>()
-            var clickEnableList = ArrayList<Boolean>()
-            var selectedList = ArrayList<Boolean>()
-            for (j: Int in productList.indices)
-            {
-                val product = productList[j]
-
-                val channelDataList: List<ProductPrice.Channel>? = product.channelList
-                if (channelDataList.isNullOrEmpty())
-                {
-                    return
-                }
-                for (channelData in channelDataList)
-                {
-                    // 价格信息
-                    var price: String = if (channelData.price == null || channelData.price == 0)
-                    {
-                        " --"
-                    } else
-                    {
-                        "${channelData.price!! / 100}"
-                    }
-                    // dataInfo.dateCompose = "¥${price}\n余 ${channel.allowStock}"
-                    priceDataList.add("¥${price}\n余 ${channelData.allowStock}")
-                    idList.add(product.id)
-                    channelList.add(channelData.channel.toString())
-                    dateList.add("${info.date}")
-                    channelData.price?.let { priceList.add(it) }
-                    val clickEnable: Boolean = isClickEnable(channelData.price, info.date)
-                    clickEnableList.add(clickEnable)
-                    selectedList.add(false)
-                }
-            }
-            val fieldName = "dateCompose_${info.date}"
-            val column = Column<PriceConsole>(info.dateCompose, fieldName, MultiLineDrawFormat<PriceConsole>(mDateWidth))
-            column.isToday = info.date == 20210912
-            mDataList.add(ColumnDateInfo(fieldName, priceDataList, idList, channelList, dateList, priceList, clickEnableList, selectedList))
-            mColumnList.add(column)
+            initRowData(info, productList)
         }
 
-        mDataList.add(ColumnDateInfo(colorColumnName, colorList, null, null, null, null))
-        mDataList.add(ColumnDateInfo(houseColumnName, houseNameList, null, null, null, null))
-        mDataList.add(ColumnDateInfo(channelColumnName, channelDataList, null, null, null, null))
+        // 添加3个固定列的数据
+        mDataList.add(ColumnDateInfo(mColorColumnName, colorList))
+        mDataList.add(ColumnDateInfo(mHouseColumnName, houseNameList))
+        mDataList.add(ColumnDateInfo(mChannelColumnName, channelDataList))
 
         // 设置表格数据
         mTableData = TableData<ColumnDateInfo>("房价表", mDataList, mColumnList as List<Column<PriceConsole>>)
         mBinding.table.setTableData(mTableData)
+        //  addColumns(0, true, 1, 3)
+    }
+
+    /**
+     * 获取价格可用库存信息
+     *
+     * @param price       价格
+     * @param allowStock  可用库存数
+     */
+    private fun getPriceStockText(price: Int?, allowStock: Int): String
+    {
+        // 价格信息
+        var price: String = if (price == null || price == 0)
+        {
+            " --"
+        } else
+        {
+            "${price / 100}"
+        }
+        return "¥${price}\n余 $allowStock"
     }
 
     /**
@@ -387,13 +374,59 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
         return week!!
     }
 
-    override fun onTableScrollToRight()
+    private fun initRowData(info: PriceConsole, productList: MutableList<ProductPrice>?)
     {
-        Toast.makeText(this, "我到最右边了", Toast.LENGTH_SHORT)
-                .show()
-        Log.d(TAG, "点击事件 滚动 边界 isRight")
-        var tmpColumnList = mutableListOf<Column<PriceConsole>>()
+        if (productList.isNullOrEmpty())
+        {
+            return
+        }
+        // 当前列下的每个方格价格/余数列表
+        val priceDataList = mutableListOf<String>()
+        // 当前列下的每个方格房型id列表
+        var idList = mutableListOf<String>()
+        // 当前列下的每个方格渠道列表
+        var channelList = mutableListOf<String>()
+        // 当前列下的每个方格日期列表
+        var dateList = mutableListOf<String>()
+        // 当前列下的每个方格价格列表
+        var priceList = mutableListOf<Int>()
+        // 当前列下的每个方格是否可以点击列表
+        var clickEnableList = mutableListOf<Boolean>()
+        // 当前列下的每个方格是否被选中列表
+        var selectedList = mutableListOf<Boolean>()
 
+        for (j: Int in productList.indices)
+        {
+            val product = productList[j]
+
+            val channelDataList: List<ProductPrice.Channel>? = product.channelList
+            if (channelDataList.isNullOrEmpty())
+            {
+                return
+            }
+            for (channelData in channelDataList)
+            {
+                priceDataList.add(getPriceStockText(channelData.price, channelData.allowStock))
+                idList.add(product.id)
+                channelList.add(channelData.channel.toString())
+                dateList.add("${info.date}")
+                channelData.price?.let { priceList.add(it) }
+                val clickEnable: Boolean = isClickEnable(channelData.price, info.date)
+                clickEnableList.add(clickEnable)
+                selectedList.add(false)
+            }
+        }
+        val fieldName = "dateCompose_${info.date}"
+        val column = Column<PriceConsole>(info.dateCompose, fieldName, MultiLineDrawFormat<PriceConsole>(mDateWidth))
+        column.isToday = info.date == 20210912
+        mDataList.add(ColumnDateInfo(fieldName, priceDataList, idList, channelList, dateList, priceList, clickEnableList, selectedList))
+        mColumnList.add(column)
+    }
+
+    private fun addColumns(index: Int, isFoot: Boolean, startColumnPosition: Int, startChildColumnPosition: Int)
+    {
+        //index参数正式时去掉
+        var tmpColumnList = mutableListOf<Column<PriceConsole>>()
         var tmpDataList: MutableList<ColumnDateInfo> = mutableListOf()
 
         for (i: Int in mPriceList.indices)
@@ -404,23 +437,31 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
                     .toDate()
             info.dateCompose = "${week}\n${date}"
 
-            val productList: List<ProductPrice>? = info.productPrices
+            val productList: MutableList<ProductPrice>? = info.productPrices
             if (productList.isNullOrEmpty())
             {
                 return
             }
-            val priceDataList = ArrayList<String>()
-            var idList = ArrayList<String>()
-            var channelList = ArrayList<String>()
-            var dateList = ArrayList<String>()
-            var priceList = ArrayList<Int>()
-            var clickEnableList = ArrayList<Boolean>()
-            var selectedList = ArrayList<Boolean>()
+            // 当前列下的每个方格价格/余数列表
+            val priceDataList = mutableListOf<String>()
+            // 当前列下的每个方格房型id列表
+            var idList = mutableListOf<String>()
+            // 当前列下的每个方格渠道列表
+            var channelList = mutableListOf<String>()
+            // 当前列下的每个方格日期列表
+            var dateList = mutableListOf<String>()
+            // 当前列下的每个方格价格列表
+            var priceList = mutableListOf<Int>()
+            // 当前列下的每个方格是否可以点击列表
+            var clickEnableList = mutableListOf<Boolean>()
+            // 当前列下的每个方格是否被选中列表
+            var selectedList = mutableListOf<Boolean>()
+
             for (j: Int in productList.indices)
             {
                 val product = productList[j]
 
-                val channelDataList: List<ProductPrice.Channel>? = product.channelList
+                val channelDataList: MutableList<ProductPrice.Channel>? = product.channelList
                 if (channelDataList.isNullOrEmpty())
                 {
                     return
@@ -428,15 +469,7 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
                 for (channelData in channelDataList)
                 {
                     // 价格信息
-                    var price: String = if (channelData.price == null || channelData.price == 0)
-                    {
-                        " --"
-                    } else
-                    {
-                        "${channelData.price!! / 100}"
-                    }
-                    // dataInfo.dateCompose = "¥${price}\n余 ${channel.allowStock}"
-                    priceDataList.add("¥${price}\n余 ${channelData.allowStock}")
+                    priceDataList.add(getPriceStockText(channelData.price, channelData.allowStock))
                     idList.add(product.id)
                     channelList.add(channelData.channel.toString())
                     dateList.add("${info.date}")
@@ -446,13 +479,21 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
                     selectedList.add(false)
                 }
             }
-            val fieldName = "dateCompose_${info.date}_1"
+            val fieldName = "dateCompose_${info.date}_$index"
             val column = Column<PriceConsole>(info.dateCompose, fieldName, MultiLineDrawFormat<PriceConsole>(mDateWidth))
             tmpDataList.add(ColumnDateInfo(fieldName, priceDataList, idList, channelList, dateList, priceList, clickEnableList, selectedList))
             tmpColumnList.add(column)
         }
+        mBinding.table.addColumns(tmpColumnList, tmpDataList, isFoot, startColumnPosition, startChildColumnPosition)
+    }
 
-        mBinding.table.addColumns(tmpColumnList, tmpDataList, true, 1, 3)
+    override fun onTableScrollToRight()
+    {
+        Toast.makeText(this, "我到最右边了", Toast.LENGTH_SHORT)
+                .show()
+        Log.d(TAG, "点击事件 滚动 边界 isRight")
+
+        addColumns(1, true, 1, 3)
     }
 
     override fun onTableScrollToLeft()
@@ -461,67 +502,8 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
         Toast.makeText(this, "我到最左边了", Toast.LENGTH_SHORT)
                 .show()
         Log.d(TAG, "点击事件 滚动 边界 isLeft")
-        var tmpColumnList = mutableListOf<Column<PriceConsole>>()
 
-        var tmpDataList: MutableList<ColumnDateInfo> = mutableListOf()
-
-        for (i: Int in mPriceList.indices)
-        {
-            val info = mPriceList[i]
-            val week = getWeekOrHoliday(info)
-            val date = LocalDate.parse(info.date.toString(), DateTimeFormatter.ofPattern("yyyyMMdd"))
-                    .toDate()
-            info.dateCompose = "${week}\n${date}"
-
-            val productList: List<ProductPrice>? = info.productPrices
-            if (productList.isNullOrEmpty())
-            {
-                return
-            }
-            val priceDataList = ArrayList<String>()
-            var idList = ArrayList<String>()
-            var channelList = ArrayList<String>()
-            var dateList = ArrayList<String>()
-            var priceList = ArrayList<Int>()
-            var clickEnableList = ArrayList<Boolean>()
-            var selectedList = ArrayList<Boolean>()
-            for (j: Int in productList.indices)
-            {
-                val product = productList[j]
-
-                val channelDataList: List<ProductPrice.Channel>? = product.channelList
-                if (channelDataList.isNullOrEmpty())
-                {
-                    return
-                }
-                for (channelData in channelDataList)
-                {
-                    // 价格信息
-                    var price: String = if (channelData.price == null || channelData.price == 0)
-                    {
-                        " --"
-                    } else
-                    {
-                        "${channelData.price!! / 100}"
-                    }
-                    // dataInfo.dateCompose = "¥${price}\n余 ${channel.allowStock}"
-                    priceDataList.add("¥${price}\n余 ${channelData.allowStock}")
-                    idList.add(product.id)
-                    channelList.add(channelData.channel.toString())
-                    dateList.add("${info.date}")
-                    channelData.price?.let { priceList.add(it) }
-                    val clickEnable: Boolean = isClickEnable(channelData.price, info.date)
-                    clickEnableList.add(clickEnable)
-                    selectedList.add(false)
-                }
-            }
-            val fieldName = "dateCompose_${info.date}_2"
-            val column = Column<PriceConsole>(info.dateCompose, fieldName, MultiLineDrawFormat<PriceConsole>(mDateWidth))
-            tmpDataList.add(ColumnDateInfo(fieldName, priceDataList, idList, channelList, dateList, priceList, clickEnableList, selectedList))
-            tmpColumnList.add(column)
-        }
-
-        mBinding.table.addColumns(tmpColumnList, tmpDataList, false, 1, 3)
+        addColumns(2, false, 1, 3)
     }
 
     private fun initCalendar()

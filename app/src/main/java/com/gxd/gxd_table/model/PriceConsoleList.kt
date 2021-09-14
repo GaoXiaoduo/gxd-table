@@ -24,17 +24,17 @@ data class ColumnDateInfo
         /** 列名，不可更改，在Column.fillData方法内调用 */
         var columnName: String = "",
         /** 每列显示数据，不可更改，在Column.fillData方法内调用 */
-        var dataList: List<String>? = null,
+        var dataList: MutableList<String>? = null,
         /** 每列房型id */
-        var idList: List<String>? = null,
+        var idList: MutableList<String>? = null,
         /** 每列显示渠道类型 */
-        var channelList: List<String>? = null,
+        var channelList: MutableList<String>? = null,
         /** 每列显示的日期 */
-        var dateList: List<String>? = null,
+        var dateList: MutableList<String>? = null,
         /** 每列显示的价格 */
-        var priceList: List<Int>? = null,
+        var priceList: MutableList<Int>? = null,
         /** 每个单元格是否可以点击 */
-        var clickEnableList: List<Boolean>? = null,
+        var clickEnableList: MutableList<Boolean>? = null,
         /** 每个单元格是否选中 */
         var selectedList: MutableList<Boolean>? = null
 )
@@ -69,7 +69,7 @@ class PriceConsole
 
     /** */
     @SerializedName("product_prices")
-    var productPrices: List<ProductPrice>? = null
+    var productPrices: MutableList<ProductPrice>? = null
 
     /** 列名称：周/假日+日期组合 */
     var dateCompose: String? = null
@@ -103,14 +103,14 @@ data class ProductPrice(
         var houseName: String,
         /** 各渠道价格信息 */
         @SerializedName("channel")
-        var channelList: List<Channel>? = null
+        var channelList: MutableList<Channel>? = null
 )
 {
     data class Channel(
-            /** 渠道 */
+            /** 可用库存 */
             @SerializedName("allow_stock")
             var allowStock: Int,
-            /** 可用库存 */
+            /** 渠道 */
             @SerializedName("channel")
             var channel: Int,
             /** 价格 */
