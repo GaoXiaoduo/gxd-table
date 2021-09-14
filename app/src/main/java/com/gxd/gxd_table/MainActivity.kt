@@ -32,6 +32,7 @@ import com.gxd.gxd_table.helper.ChannelViewHelper
 import com.gxd.gxd_table.model.ColumnDateInfo
 import com.gxd.gxd_table.model.PriceConsole
 import com.gxd.gxd_table.model.ProductPrice
+import com.gxd.gxd_table.model.SelectedDateInfo
 import com.gxd.gxd_table.util.GsonUtils
 import com.gxd.gxd_table.util.GxdFileUtils
 import java.time.LocalDate
@@ -284,9 +285,19 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
             {
                 return ContextCompat.getColor(this@MainActivity, R.color.table_cell_selected_bg_color)
             }
+
+            override fun getTextColor(t: CellInfo<*>?): Int
+            {
+                return ContextCompat.getColor(this@MainActivity, R.color.table_cell_selected_text_color)
+            }
         }
     }
-    // private val mSelectedCellList: MutableList<>
+
+    /** 当前选中的行号 */
+    private var mCurrentClickRow: Int = -1;
+
+    /** 已选中的方格信息 key=列数，value=方格数据信息*/
+    private var mSelectedCellMap = HashMap<Int, SelectedDateInfo>()
 
     private fun tableClick()
     {
@@ -299,21 +310,42 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
                 if (colInfo.columnName == column.fieldName)
                 {
                     val rowString = colInfo.dataList?.get(row)
-                    val idString = colInfo.idList?.get(row)
-                    val channelString = colInfo.channelList?.get(row)
-                    val dateString = colInfo.dateList?.get(row)
+                    val idString = colInfo.idList?.get(row) ?: ""
+                    val channelInt = colInfo.channelList?.get(row) ?: 0
+                    val dateInt = colInfo.dateList?.get(row) ?: 0
                     val clickEnable = colInfo.clickEnableList?.get(row)
-                    var selected = colInfo.selectedList?.get(row)
-                    var selectedList = colInfo.selectedList
+                    val selected = colInfo.selectedList?.get(row)
+
                     if (clickEnable!!)
                     {
                         Log.e(TAG, "点击事件 列:$col,行:$row,clickEnable:$clickEnable")
-                        colInfo.selectedList?.set(row, !selected!!)
+                        if (mCurrentClickRow == -1)
+                        {
+                            mCurrentClickRow = row
+                        }
+                        if (mCurrentClickRow == row)
+                        {
+
+                            val currentSelected = !selected!!
+                            if (currentSelected)
+                            {
+                                mSelectedCellMap[col] = SelectedDateInfo(idString, channelInt, dateInt)
+                            } else
+                            {
+                                mSelectedCellMap.remove(col)
+                            }
+                            colInfo.selectedList?.set(row, currentSelected)
+                        }
                     }
                     //Log.e(TAG, "点击事件 列:$col,行:$row,rowString:$rowString,idString：$idString,channelString：$channelString,dateString：$dateString")
                     break
                 }
             }
+            if (mSelectedCellMap.size == 0)
+            {
+                mCurrentClickRow = -1
+            }
+            Log.e(TAG, "点击事件 列 选中size:${mSelectedCellMap.size}")
             mBinding.table.invalidate()
         }
         // 左右滑动边界回调事件
@@ -385,9 +417,9 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
         // 当前列下的每个方格房型id列表
         var idList = mutableListOf<String>()
         // 当前列下的每个方格渠道列表
-        var channelList = mutableListOf<String>()
+        var channelList = mutableListOf<Int>()
         // 当前列下的每个方格日期列表
-        var dateList = mutableListOf<String>()
+        var dateList = mutableListOf<Int>()
         // 当前列下的每个方格价格列表
         var priceList = mutableListOf<Int>()
         // 当前列下的每个方格是否可以点击列表
@@ -408,8 +440,8 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
             {
                 priceDataList.add(getPriceStockText(channelData.price, channelData.allowStock))
                 idList.add(product.id)
-                channelList.add(channelData.channel.toString())
-                dateList.add("${info.date}")
+                channelList.add(channelData.channel)
+                dateList.add(info.date)
                 channelData.price?.let { priceList.add(it) }
                 val clickEnable: Boolean = isClickEnable(channelData.price, info.date)
                 clickEnableList.add(clickEnable)
@@ -447,9 +479,9 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
             // 当前列下的每个方格房型id列表
             var idList = mutableListOf<String>()
             // 当前列下的每个方格渠道列表
-            var channelList = mutableListOf<String>()
+            var channelList = mutableListOf<Int>()
             // 当前列下的每个方格日期列表
-            var dateList = mutableListOf<String>()
+            var dateList = mutableListOf<Int>()
             // 当前列下的每个方格价格列表
             var priceList = mutableListOf<Int>()
             // 当前列下的每个方格是否可以点击列表
@@ -471,8 +503,8 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
                     // 价格信息
                     priceDataList.add(getPriceStockText(channelData.price, channelData.allowStock))
                     idList.add(product.id)
-                    channelList.add(channelData.channel.toString())
-                    dateList.add("${info.date}")
+                    channelList.add(channelData.channel)
+                    dateList.add(info.date)
                     channelData.price?.let { priceList.add(it) }
                     val clickEnable: Boolean = isClickEnable(channelData.price, info.date)
                     clickEnableList.add(clickEnable)

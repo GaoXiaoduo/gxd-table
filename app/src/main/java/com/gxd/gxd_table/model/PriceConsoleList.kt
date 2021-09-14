@@ -28,9 +28,9 @@ data class ColumnDateInfo
         /** 每列房型id */
         var idList: MutableList<String>? = null,
         /** 每列显示渠道类型 */
-        var channelList: MutableList<String>? = null,
+        var channelList: MutableList<Int>? = null,
         /** 每列显示的日期 */
-        var dateList: MutableList<String>? = null,
+        var dateList: MutableList<Int>? = null,
         /** 每列显示的价格 */
         var priceList: MutableList<Int>? = null,
         /** 每个单元格是否可以点击 */
