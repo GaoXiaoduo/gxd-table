@@ -92,16 +92,8 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
         mColorBarArray = getYColorBar()
         initData()
         initCalendar()
+        initTableConfig()
         tableClick()
-        //        mHandler.postDelayed(object : Runnable
-        //        {
-        //            override fun run()
-        //            {
-        //                mHandler.postDelayed(this, 3000)
-        //                // addColumns()
-        //                // setColumnsStyle()
-        //            }
-        //        }, 3000)
     }
 
 
@@ -231,9 +223,16 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
         mDataList.add(ColumnDateInfo(houseColumnName, houseNameList, null, null, null, null))
         mDataList.add(ColumnDateInfo(channelColumnName, channelDataList, null, null, null, null))
 
+        // 设置表格数据
         mTableData = TableData<ColumnDateInfo>("房价表", mDataList, mColumnList as List<Column<PriceConsole>>)
-
         mBinding.table.setTableData(mTableData)
+    }
+
+    /**
+     * 初始化表格配置
+     */
+    private fun initTableConfig()
+    {
         // 隐藏行序号
         mBinding.table.config.isShowXSequence = false
         // 隐藏列序号
@@ -290,12 +289,6 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
             {
                 return TableConfig.INVALID_COLOR
             }
-
-            override fun isEffectivePrice(cellInfo: CellInfo<*>, col: Int, row: Int): Boolean
-            {
-                return false
-            }
-
         }
         // 设置内容方格选中时的背景颜色(蓝色色)
         mBinding.table.config.selectedCellBackgroundFormat = object : BaseCellBackgroundFormat<CellInfo<*>>()
@@ -306,7 +299,6 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
             }
         }
     }
-
     // private val mSelectedCellList: MutableList<>
 
     private fun tableClick()
