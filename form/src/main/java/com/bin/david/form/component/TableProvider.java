@@ -335,6 +335,13 @@ public class TableProvider<T> implements TableClickObserver
             {
                 config.getColumnTitleCellBackgroundFormat().drawBackground(canvas, tempRect,
                         cellInfo, config.getPaint());
+                int textColor =
+                        config.getColumnTitleCellBackgroundFormat().getTextColor(cellInfo);
+                if (textColor != TableConfig.INVALID_COLOR)
+                {
+                    config.getContentGridStyle().fillPaint(config.getPaint());
+                    config.getPaint().setColor(textColor);
+                }
             }
             // 画网格边线
             if (config.getTableGridFormat() != null)
@@ -344,8 +351,7 @@ public class TableProvider<T> implements TableClickObserver
                 config.getTableGridFormat().drawColumnTitleGrid(canvas, tempRect, info
                         .column, position, paint);
             }
-
-            //tableData.getTitleDrawFormat().draw(canvas, info.column, tempRect, config);
+            // 画列标题文字
             if (config.getColumnDateTitleFormat() != null)
             {
                 config.getColumnDateTitleFormat().draw(canvas, info.column, tempRect, config);

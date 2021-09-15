@@ -264,7 +264,7 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
         })
         // 设置日期列标题格式
         mBinding.table.config.columnDateTitleFormat = DateTitleDrawFormat(this@MainActivity,
-                R.mipmap.ic_room_price_date_bg, R.color.date_text_color)
+                R.mipmap.ic_room_price_date_bg, R.color.table_cell_column_title_today_text_color, R.color.table_cell_column_title_week_normal_text_color, R.color.table_cell_column_title_holiday_text_color, R.color.table_cell_column_title_date_normal_text_color)
         // 设置日期列标题周五、周六、假日的背景颜色(黄色)
         mBinding.table.config.columnTitleCellBackgroundFormat = object : BaseCellBackgroundFormat<CellInfo<*>>()
         {
@@ -372,15 +372,17 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
         }
     }
 
+    /**
+     * 获取彩条颜色数组
+     * @return 彩条颜色数组
+     */
     private fun getYColorBar(): IntArray
     {
         val yColorBar1 = ContextCompat.getColor(this, R.color.y_color_bar_1)
         val yColorBar2 = ContextCompat.getColor(this, R.color.y_color_bar_2)
         val yColorBar3 = ContextCompat.getColor(this, R.color.y_color_bar_3)
         val yColorBar4 = ContextCompat.getColor(this, R.color.y_color_bar_4)
-        val yColorBar5 = ContextCompat.getColor(this, R.color.white)
-
-        return intArrayOf(yColorBar1, yColorBar2, yColorBar3, yColorBar4, yColorBar5)
+        return intArrayOf(yColorBar1, yColorBar2, yColorBar3, yColorBar4)
     }
 
     private fun getWeekOrHoliday(info: PriceConsole): String
@@ -467,11 +469,7 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
         val fieldName = "dateCompose_${info.date}"
         val column = Column<PriceConsole>(info.dateCompose, fieldName, MultiLineDrawFormat<PriceConsole>(mDateWidth))
         column.isToday = info.date == 20210912
-        val week: String = LocalDate.parse(info.date.toString(), DateTimeFormatter.ofPattern("yyyyMMdd"))
-                .toWeek()
-        val isWeekBg = (week == "五" || week == "六")
-        val isHoliday = info.dateType == 2
-        column.isHoliday = isHoliday || isWeekBg
+        column.isHoliday = isHoliday(info)
         mDataList.add(ColumnDateInfo(fieldName, priceDataList, idList, channelList, dateList, priceList, clickEnableList, selectedList))
         mColumnList.add(column)
     }
@@ -536,6 +534,8 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
             }
             val fieldName = "dateCompose_${info.date}_${index}_${page}"
             val column = Column<PriceConsole>(info.dateCompose, fieldName, MultiLineDrawFormat<PriceConsole>(mDateWidth))
+            column.isToday = info.date == 20210912
+            column.isHoliday = isHoliday(info)
             tmpDataList.add(ColumnDateInfo(fieldName, priceDataList, idList, channelList, dateList, priceList, clickEnableList, selectedList))
             tmpColumnList.add(column)
         }
@@ -565,6 +565,21 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
     private fun initCalendar()
     {
         mTableData?.calendarText = "2021-09-13"
+    }
+
+    /**
+     * 是否为周五、周六、假日
+     *
+     * @param info
+     * @return  true:是，false:否
+     */
+    private fun isHoliday(info: PriceConsole): Boolean
+    {
+        val week: String = LocalDate.parse(info.date.toString(), DateTimeFormatter.ofPattern("yyyyMMdd"))
+                .toWeek()
+        val isWeekBg = (week == "五" || week == "六")
+        val isHoliday = info.dateType == 2
+        return isHoliday || isWeekBg
     }
 
     private fun isClickEnable(price: Int?, date: Int): Boolean

@@ -21,5 +21,9 @@
     <color name="table_cell_selected_text_color">#FFFFFFFF</color>
     <color name="table_cell_column_title_holiday_bg_color">#FFF5E6</color>
     <color name="table_cell_column_title_holiday_text_color">#F09A19</color>
+    <color name="table_cell_column_title_week_normal_text_color">#33000000</color>
+    <color name="table_cell_column_title_date_normal_text_color">#B3000000</color>
+    <color name="table_cell_column_title_today_text_color">#FFFFFFFF</color>
+
 
 </resources>

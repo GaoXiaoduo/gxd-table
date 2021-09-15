@@ -47,7 +47,14 @@ public class DateTitleDrawFormat implements ITitleDrawFormat
 
     private int mTodayResourceID;
 
+    /**
+     * 周、假字体
+     */
+    private FontStyle mWeekFontStyle;
 
+    /**
+     * 日期字体
+     */
     private FontStyle mDateFontStyle;
 
     // 日历总高度92*2
@@ -55,14 +62,41 @@ public class DateTitleDrawFormat implements ITitleDrawFormat
 
     private int dateRectHeight = 104;
 
+    private static int defaultFontColor = Color.parseColor("#636363");
+
+    /**
+     * 今日默认字体颜色
+     */
+    private int mTodayTextColor;
+
+    /**
+     * 周默认字体颜色
+     */
+    private int mWeekTextNormalColor;
+
+    /**
+     * 周五、六、假日字体颜色
+     */
+    private int mWeekTextHolidayColor;
+
+    /**
+     * 日期字体颜色
+     */
+    private int mDateTextColor;
+
     /**
      * 日期列标题
      *
-     * @param context           上下文
-     * @param todayBgResourceID 今日背景图片资源ID
-     * @param dateTextColor     日期默认颜色
+     * @param context              上下文
+     * @param todayBgResourceID    今日背景图片资源ID
+     * @param todayTextColor       今日字体颜色
+     * @param weekTextNormalColor  周默认颜色
+     * @param weekTextHolidayColor 周五、周六、假日 颜色
+     * @param dateTextColor        日期默认颜色
      */
-    public DateTitleDrawFormat (Context context, int todayBgResourceID, int dateTextColor)
+    public DateTitleDrawFormat (
+            Context context, int todayBgResourceID, int todayTextColor, int weekTextNormalColor,
+            int weekTextHolidayColor, int dateTextColor)
     {
 
         mContext = context;
@@ -81,8 +115,14 @@ public class DateTitleDrawFormat implements ITitleDrawFormat
                 return bitmap.getRowBytes() * bitmap.getHeight() / 1024;// KB
             }
         };
-        mDateFontStyle = new FontStyle(mContext, 16,
-                mContext.getResources().getColor(dateTextColor)).setAlign(Paint.Align.CENTER);
+        mTodayTextColor = mContext.getResources().getColor(todayTextColor);
+        mWeekTextNormalColor = mContext.getResources().getColor(weekTextNormalColor);
+        mWeekTextHolidayColor = mContext.getResources().getColor(weekTextHolidayColor);
+        mDateTextColor = mContext.getResources().getColor(dateTextColor);
+
+        mWeekFontStyle =
+                new FontStyle(mContext, 12, mWeekTextNormalColor).setAlign(Paint.Align.CENTER);
+        mDateFontStyle = new FontStyle(mContext, 16, mDateTextColor).setAlign(Paint.Align.CENTER);
     }
 
     private boolean isDrawBg;
@@ -151,6 +191,15 @@ public class DateTitleDrawFormat implements ITitleDrawFormat
     {
 
         mTempRect.set(rect.left, rect.top, rect.right, weekRectHeight);
+        if (column.isHoliday())
+        {
+            mWeekFontStyle.setTextColor(mWeekTextHolidayColor);
+        }
+        else
+        {
+            mWeekFontStyle.setTextColor(mWeekTextNormalColor);
+        }
+        mWeekFontStyle.fillPaint(paint);
         c.drawText(week, DrawUtils.getTextCenterX(mTempRect.left, mTempRect.right, paint)
                 , DrawUtils.getTextCenterY((weekRectHeight + mTempRect.top) / 2, paint), paint);
     }
@@ -162,8 +211,15 @@ public class DateTitleDrawFormat implements ITitleDrawFormat
 
         int top = rect.top + weekRectHeight;
         mTempRect.set(rect.left, top, rect.right, rect.bottom);
+        if (column.isToday())
+        {
+            mDateFontStyle.setTextColor(mTodayTextColor);
+        }
+        else
+        {
+            mDateFontStyle.setTextColor(mDateTextColor);
+        }
         mDateFontStyle.fillPaint(paint);
-        //drawGridBackground(c, mTempRect, config, Color.argb(33, 66, 99, 88));
         c.drawText(date, DrawUtils.getTextCenterX(mTempRect.left, mTempRect.right, paint)
                 , DrawUtils.getTextCenterY((mTempRect.bottom + top) / 2, paint), paint);
     }
