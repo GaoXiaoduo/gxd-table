@@ -70,6 +70,12 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
 
     private var mDataList: MutableList<ColumnDateInfo> = mutableListOf()
 
+    /** 当前选中的行号 */
+    private var mCurrentClickRow: Int = -1
+
+    /** 已选中的方格信息 key=列数，value=方格数据信息*/
+    private var mSelectedCellMap = HashMap<Int, SelectedDateInfo>()
+
     override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
@@ -197,7 +203,6 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
             mTableData = TableData<ColumnDateInfo>("房价表", mDataList, mColumnList as List<Column<PriceConsole>>)
             mBinding.table.setTableData(mTableData)
         }
-        //  addColumns(0, true, 1, 3)
     }
 
     /**
@@ -248,8 +253,8 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
                 canvas.drawRect(left.toFloat(), top.toFloat(), right.toFloat(), bottom.toFloat(), paint)
             }
         }
-        // 设置日历文字格式化
-        mBinding.table.config.setCalendarTextFormat(object : CalendarTextImageDrawFormat<String>(40, 20, BOTTOM, 0)
+        // 设置日历文字格式化24x12
+        mBinding.table.config.setCalendarTextFormat(object : CalendarTextImageDrawFormat<String>(DensityUtils.dp2px(this@MainActivity, 24f), DensityUtils.dp2px(this@MainActivity, 12f), BOTTOM, 0)
         {
             override fun getContext(): Context
             {
@@ -308,12 +313,6 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
             }
         }
     }
-
-    /** 当前选中的行号 */
-    private var mCurrentClickRow: Int = -1
-
-    /** 已选中的方格信息 key=列数，value=方格数据信息*/
-    private var mSelectedCellMap = HashMap<Int, SelectedDateInfo>()
 
     private fun tableClick()
     {

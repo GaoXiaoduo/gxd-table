@@ -141,7 +141,9 @@ public abstract class CalendarTextImageDrawFormat<T> extends ImageResDrawFormat<
                 this.rect.set(rect.left, rect.top, rect.right,
                         rect.bottom - (imgHeight + drawPadding) / 2);
                 //textDrawFormat.draw(c, this.rect, cellInfo, config);
-                drawText(c, cellInfo.value, rect, config.getPaint(), config);
+                Rect tempRect = new Rect();
+                tempRect.set(rect.left, rect.top, rect.right, rect.bottom - imgHeight / 2);
+                drawText(c, cellInfo.value, tempRect, config.getPaint(), config);
                 int imgTop =
                         (rect.top + rect.bottom) / 2 + textDrawFormat.measureHeight(cellInfo.column, cellInfo.row, config) / 2 - drawPadding;
                 this.rect.set(rect.left, imgTop, rect.right, imgTop + imgHeight);
