@@ -464,7 +464,8 @@ public class TableProvider<T> implements TableClickObserver
                                 }
                                 operation.checkSelectedPoint(i, j, correctCellRect);
                                 cellInfo.set(column, data, value, i, j);
-                                drawContentCellBackground(column, canvas, cellInfo, tempRect, i, j);
+                                drawContentCellBackground(column, canvas, cellInfo,
+                                        correctCellRect, i, j);
                                 drawContentCell(canvas, cellInfo, correctCellRect,
                                         column.isColorBar(), config);
                             }
@@ -504,8 +505,7 @@ public class TableProvider<T> implements TableClickObserver
             if (column.isColorBar())
             {
                 new BaseBackgroundFormat(Integer.valueOf(cellInfo.value)).drawBackground(c,
-                        rect,
-                        config.getPaint());
+                        rect, config.getPaint());
             }
             //是否可以点击列表
             List<Boolean> clickEnableList = column.getClickEnableList(tableData.getT());
@@ -517,8 +517,7 @@ public class TableProvider<T> implements TableClickObserver
                 if (!column.isColorBar())
                 {
                     rect.left += config.getTextLeftOffset();
-                    cellInfo.column.getDrawFormat().draw(c, rect, cellInfo,
-                            config);
+                    cellInfo.column.getDrawFormat().draw(c, rect, cellInfo, config);
                 }
                 return;
             }
@@ -552,13 +551,11 @@ public class TableProvider<T> implements TableClickObserver
                 }
                 else
                 {
-                    //画非彩条、非固定列文字
+                    //画非彩条、非固定列文字(价格列文字)
                     if (!column.isColorBar())
                     {
                         rect.left += config.getTextLeftOffset();
-                        cellInfo.column.getDrawFormat().draw(c, rect,
-                                cellInfo,
-                                config);
+                        cellInfo.column.getDrawPriceFormat().draw(c, rect, cellInfo, config);
                     }
                 }
             }
@@ -594,8 +591,7 @@ public class TableProvider<T> implements TableClickObserver
         {
             config.getContentGridStyle().fillPaint(config.getPaint());
             config.getTableGridFormat().drawContentGrid(c, cellInfo.col, cellInfo.row,
-                    rect,
-                    cellInfo, config.getPaint());
+                    rect, cellInfo, config.getPaint());
         }
         //
         //        if (isColorBar)

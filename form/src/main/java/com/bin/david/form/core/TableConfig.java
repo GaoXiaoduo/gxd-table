@@ -75,6 +75,17 @@ public class TableConfig
      */
     private FontStyle calendarTitleStyle;
 
+
+    /**
+     * 方格价格字体样式
+     */
+    private FontStyle priceTitleStyle;
+
+    /**
+     * 方格库存字体样式
+     */
+    private FontStyle stockTitleStyle;
+
     /**
      * 列标题网格样式
      */
@@ -656,6 +667,54 @@ public class TableConfig
     {
 
         this.calendarTitleStyle = calendarTitleStyle;
+        return this;
+    }
+
+    public FontStyle getPriceTitleStyle ()
+    {
+
+        if (stockTitleStyle == null)
+        {
+            return defaultFontStyle;
+        }
+        return priceTitleStyle;
+    }
+
+    /**
+     * 设置方格价格字体样式
+     *
+     * @param priceTitleStyle
+     *
+     * @return
+     */
+    public TableConfig setPriceTitleStyle (FontStyle priceTitleStyle)
+    {
+
+        this.priceTitleStyle = priceTitleStyle;
+        return this;
+    }
+
+    public FontStyle getStockTitleStyle ()
+    {
+
+        if (stockTitleStyle == null)
+        {
+            return defaultFontStyle;
+        }
+        return stockTitleStyle;
+    }
+
+    /**
+     * 设置方格库存字体样式
+     *
+     * @param stockTitleStyle
+     *
+     * @return
+     */
+    public TableConfig setStockTitleStyle (FontStyle stockTitleStyle)
+    {
+
+        this.stockTitleStyle = stockTitleStyle;
         return this;
     }
 

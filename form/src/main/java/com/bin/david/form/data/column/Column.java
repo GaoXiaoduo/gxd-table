@@ -11,6 +11,7 @@ import com.bin.david.form.data.format.count.StringCountFormat;
 import com.bin.david.form.data.format.draw.FastTextDrawFormat;
 import com.bin.david.form.data.format.draw.IDrawFormat;
 import com.bin.david.form.data.format.draw.MultiLineDrawFormat;
+import com.bin.david.form.data.format.draw.PriceTextDrawFormat;
 import com.bin.david.form.data.format.draw.SelectedTextDrawFormat;
 import com.bin.david.form.data.format.draw.TextDrawFormat;
 import com.bin.david.form.listener.OnColumnItemClickListener;
@@ -49,6 +50,11 @@ public class Column<T> implements Comparable<Column>
      * 画选中的方格文字
      */
     private IDrawFormat<T> drawSelectedFormat;
+
+    /**
+     * 画价格方格文字
+     */
+    private IDrawFormat<T> drawPriceFormat;
 
     private String fieldName;
 
@@ -314,6 +320,33 @@ public class Column<T> implements Comparable<Column>
     {
 
         this.drawSelectedFormat = drawSelectedFormat;
+    }
+
+    /**
+     * 获取价格绘制格式化
+     *
+     * @return 价格绘制格式化
+     */
+    public IDrawFormat<T> getDrawPriceFormat ()
+    {
+
+        if (drawPriceFormat == null)
+        {
+            drawPriceFormat = isFast ? new FastTextDrawFormat<T>() :
+                    new PriceTextDrawFormat<T>();
+        }
+        return drawPriceFormat;
+    }
+
+    /**
+     * 设置价格绘制格式化
+     *
+     * @return 价格绘制格式化
+     */
+    public void setDrawPriceFormat (IDrawFormat<T> drawPriceFormat)
+    {
+
+        this.drawPriceFormat = drawPriceFormat;
     }
 
     /**

@@ -81,7 +81,7 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
         super.onCreate(savedInstanceState)
         _binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(mBinding.root)
-        mDateWidth = DensityUtils.dp2px(this@MainActivity, 50f)
+        mDateWidth = DensityUtils.dp2px(this@MainActivity, 52f)
         initFile()
         initTable()
     }
@@ -284,7 +284,11 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
             }
         }
         // 设置左上角日期标题字体样式
-        mBinding.table.config.calendarTitleStyle = FontStyle(this, 14, ContextCompat.getColor(this, R.color.table_calendar_text_color)).setAlign(Paint.Align.CENTER)
+        mBinding.table.config.calendarTitleStyle = FontStyle(this, 12, ContextCompat.getColor(this, R.color.table_calendar_text_color)).setAlign(Paint.Align.CENTER)
+        // 设置方格价格字体样式
+        mBinding.table.config.priceTitleStyle = FontStyle(this, 12, ContextCompat.getColor(this, R.color.table_cell_column_price_text_color)).setAlign(Paint.Align.CENTER)
+        // 设置方格库存字体样式
+        mBinding.table.config.stockTitleStyle = FontStyle(this, 12, ContextCompat.getColor(this, R.color.table_cell_column_stock_text_color)).setAlign(Paint.Align.CENTER)
 
         // 设置内容方格价格无效背景颜色(灰色)
         mBinding.table.config.columnPriceCellBackgroundFormat = object : PriceCellBackgroundFormat<CellInfo<*>>()
