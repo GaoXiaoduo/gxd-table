@@ -103,6 +103,11 @@ public class Column<T> implements Comparable<Column>
     private boolean isToday = false;
 
     /**
+     * 是否为节假日，true:是；false：不是
+     */
+    private boolean isHoliday = false;
+
+    /**
      * 列构造方法
      * 用于构造组合列
      *
@@ -915,6 +920,26 @@ public class Column<T> implements Comparable<Column>
     {
 
         this.isToday = isToday;
+    }
+
+    /**
+     * 是否为节假日，true:是；false：不是
+     *
+     * @return 是否固定
+     */
+    public boolean isHoliday ()
+    {
+
+        return isHoliday;
+    }
+
+    /**
+     * 是否为节假日，true:是；false：不是
+     */
+    public void setHoliday (boolean isHoliday)
+    {
+
+        this.isHoliday = isHoliday;
     }
 
     /**

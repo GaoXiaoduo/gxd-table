@@ -330,6 +330,13 @@ public class TableProvider<T> implements TableClickObserver
             }
             Paint paint = config.getPaint();
             tempRect.set(left, top, right, bottom);
+            // 画假日背景
+            if (config.getColumnTitleCellBackgroundFormat() != null && info.column != null && info.column.isHoliday())
+            {
+                config.getColumnTitleCellBackgroundFormat().drawBackground(canvas, tempRect,
+                        cellInfo, config.getPaint());
+            }
+            // 画网格边线
             if (config.getTableGridFormat() != null)
             {
                 config.getColumnTitleGridStyle().fillPaint(paint);
@@ -337,6 +344,7 @@ public class TableProvider<T> implements TableClickObserver
                 config.getTableGridFormat().drawColumnTitleGrid(canvas, tempRect, info
                         .column, position, paint);
             }
+
             //tableData.getTitleDrawFormat().draw(canvas, info.column, tempRect, config);
             if (config.getColumnDateTitleFormat() != null)
             {

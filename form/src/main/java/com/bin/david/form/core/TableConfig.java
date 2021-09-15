@@ -231,6 +231,12 @@ public class TableConfig
 
 
     /**
+     * 设置日期列标题背景格式化
+     */
+    private ICellBackgroundFormat<CellInfo> columnTitleCellBackgroundFormat;
+
+
+    /**
      * 左上角日历背景
      */
     private IBackgroundFormat calendarBackground;
@@ -766,6 +772,30 @@ public class TableConfig
 
         this.selectedCellBackgroundFormat = selectedCellBackgroundFormat;
         return this;
+    }
+
+    /**
+     * 获选日期列标题背景格式化
+     *
+     * @return
+     */
+    public ICellBackgroundFormat<CellInfo> getColumnTitleCellBackgroundFormat ()
+    {
+
+        return columnTitleCellBackgroundFormat;
+    }
+
+    /**
+     * 设置选中格子背景格式化
+     *
+     * @param columnTitleCellBackgroundFormat 选中格子背景格式化
+     *
+     * @return
+     */
+    public void setColumnTitleCellBackgroundFormat (ICellBackgroundFormat<CellInfo> columnTitleCellBackgroundFormat)
+    {
+
+        this.columnTitleCellBackgroundFormat = columnTitleCellBackgroundFormat;
     }
 
     public ICellBackgroundFormat<Integer> getXSequenceCellBgFormat ()

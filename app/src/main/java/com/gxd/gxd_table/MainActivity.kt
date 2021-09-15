@@ -192,8 +192,11 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
         mDataList.add(ColumnDateInfo(mChannelColumnName, channelDataList))
 
         // 设置表格数据
-        mTableData = TableData<ColumnDateInfo>("房价表", mDataList, mColumnList as List<Column<PriceConsole>>)
-        mBinding.table.setTableData(mTableData)
+        if (mTableData == null)
+        {
+            mTableData = TableData<ColumnDateInfo>("房价表", mDataList, mColumnList as List<Column<PriceConsole>>)
+            mBinding.table.setTableData(mTableData)
+        }
         //  addColumns(0, true, 1, 3)
     }
 
@@ -262,6 +265,19 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
         // 设置日期列标题格式
         mBinding.table.config.columnDateTitleFormat = DateTitleDrawFormat(this@MainActivity,
                 R.mipmap.ic_room_price_date_bg, R.color.date_text_color)
+        // 设置日期列标题周五、周六、假日的背景颜色(黄色)
+        mBinding.table.config.columnTitleCellBackgroundFormat = object : BaseCellBackgroundFormat<CellInfo<*>>()
+        {
+            override fun getBackGroundColor(cellInfo: CellInfo<*>): Int
+            {
+                return ContextCompat.getColor(this@MainActivity, R.color.table_cell_column_title_holiday_bg_color)
+            }
+
+            override fun getTextColor(t: CellInfo<*>?): Int
+            {
+                return ContextCompat.getColor(this@MainActivity, R.color.table_cell_column_title_holiday_text_color)
+            }
+        }
         // 设置左上角日期标题字体样式
         mBinding.table.config.calendarTitleStyle = FontStyle(this, 14, ContextCompat.getColor(this, R.color.table_calendar_text_color)).setAlign(Paint.Align.CENTER)
 
@@ -278,7 +294,7 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
                 return TableConfig.INVALID_COLOR
             }
         }
-        // 设置内容方格选中时的背景颜色(蓝色色)
+        // 设置内容方格选中时的背景颜色(蓝色)
         mBinding.table.config.selectedCellBackgroundFormat = object : BaseCellBackgroundFormat<CellInfo<*>>()
         {
             override fun getBackGroundColor(cellInfo: CellInfo<*>): Int
@@ -294,7 +310,7 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
     }
 
     /** 当前选中的行号 */
-    private var mCurrentClickRow: Int = -1;
+    private var mCurrentClickRow: Int = -1
 
     /** 已选中的方格信息 key=列数，value=方格数据信息*/
     private var mSelectedCellMap = HashMap<Int, SelectedDateInfo>()
@@ -345,7 +361,7 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
             {
                 mCurrentClickRow = -1
             }
-            Log.e(TAG, "点击事件 列 选中size:${mSelectedCellMap.size}")
+            Log.i(TAG, "点击事件 列 选中size:${mSelectedCellMap.size}")
             mBinding.table.invalidate()
         }
         // 左右滑动边界回调事件
@@ -451,9 +467,16 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
         val fieldName = "dateCompose_${info.date}"
         val column = Column<PriceConsole>(info.dateCompose, fieldName, MultiLineDrawFormat<PriceConsole>(mDateWidth))
         column.isToday = info.date == 20210912
+        val week: String = LocalDate.parse(info.date.toString(), DateTimeFormatter.ofPattern("yyyyMMdd"))
+                .toWeek()
+        val isWeekBg = (week == "五" || week == "六")
+        val isHoliday = info.dateType == 2
+        column.isHoliday = isHoliday || isWeekBg
         mDataList.add(ColumnDateInfo(fieldName, priceDataList, idList, channelList, dateList, priceList, clickEnableList, selectedList))
         mColumnList.add(column)
     }
+
+    private var page = 0
 
     private fun addColumns(index: Int, isFoot: Boolean, startColumnPosition: Int, startChildColumnPosition: Int)
     {
@@ -511,12 +534,13 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
                     selectedList.add(false)
                 }
             }
-            val fieldName = "dateCompose_${info.date}_$index"
+            val fieldName = "dateCompose_${info.date}_${index}_${page}"
             val column = Column<PriceConsole>(info.dateCompose, fieldName, MultiLineDrawFormat<PriceConsole>(mDateWidth))
             tmpDataList.add(ColumnDateInfo(fieldName, priceDataList, idList, channelList, dateList, priceList, clickEnableList, selectedList))
             tmpColumnList.add(column)
         }
         mBinding.table.addColumns(tmpColumnList, tmpDataList, isFoot, startColumnPosition, startChildColumnPosition)
+        page++
     }
 
     override fun onTableScrollToRight()
