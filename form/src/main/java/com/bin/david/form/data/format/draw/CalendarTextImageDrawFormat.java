@@ -11,6 +11,9 @@ import com.bin.david.form.data.style.FontStyle;
 import com.bin.david.form.exception.TableException;
 import com.bin.david.form.utils.DrawUtils;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
 /**
  * Created by huang on 2017/10/30.
  */
@@ -166,6 +169,12 @@ public abstract class CalendarTextImageDrawFormat<T> extends ImageResDrawFormat<
             paint.setColor(frontStyle.getTextColor());
             paint.setTextSize(paint.getTextSize() * config.getZoom());
         }
-        DrawUtils.drawSingleText(c, paint, rect, value);
+        String tempValue = "";
+        if (!value.isEmpty())
+        {
+            tempValue = LocalDate.parse(value, DateTimeFormatter.ofPattern("yyyyMMdd"))
+                    .toString();
+        }
+        DrawUtils.drawSingleText(c, paint, rect, tempValue);
     }
 }

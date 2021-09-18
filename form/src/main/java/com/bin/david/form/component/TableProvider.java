@@ -279,7 +279,11 @@ public class TableProvider<T> implements TableClickObserver
             else if (isPerColumnFixed && info.top != 0)
             {
                 left = (int) (clipRect.left - info.width * zoom);
-                left += (info.left - parentColumnInfo.left);
+                // 固定子列
+                if (info.getParent() == null)
+                {
+                    left += (info.left - parentColumnInfo.left);
+                }
             }
             else if (isPerColumnFixed)
             {

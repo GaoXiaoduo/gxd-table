@@ -118,12 +118,12 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
     {
         // 设置彩条列属性
         val colorColumn = Column<PriceConsole>("", mColorColumnName, MultiLineDrawFormat<PriceConsole>(1))
-        colorColumn.isFixed = false
+        colorColumn.isFixed = true
         colorColumn.isAutoMerge = true
         colorColumn.isColorBar = true
         // 设置房型名称列属性
         val houseNameColumn = Column<PriceConsole>("房型", mHouseColumnName, MultiLineDrawFormat<PriceConsole>(200))
-        houseNameColumn.isFixed = false
+        houseNameColumn.isFixed = true
         houseNameColumn.isAutoMerge = true
         // 设置渠道列属性
         val channelIconWidth = DensityUtils.dp2px(this@MainActivity, 23f)
@@ -140,7 +140,7 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
 
             }
         })
-        channelColumn.isFixed = false
+        channelColumn.isFixed = true
         // 设置日历列属性（包含彩条、房型、渠道3个子列）
         val calendarColumn = Column<PriceConsole>("日历", colorColumn, houseNameColumn, channelColumn) // MultiLineDrawFormat<PriceConsole>(140)) // houseNameColumn) //, channelColumn)
         calendarColumn.isFixed = true
@@ -238,7 +238,7 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
         // 隐藏列标题
         mBinding.table.config.isShowColumnTitle = true
         // 固定标题
-        mBinding.table.config.isFixedTitle = true
+        //mBinding.table.config.isFixedTitle = true
         // 固定左侧颜色条颜色值数组
         mBinding.table.config.yColorBarArray = getYColorBar()
         // 设置日历背景
@@ -471,7 +471,7 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
         }
         val fieldName = "dateCompose_${info.date}"
         val column = Column<PriceConsole>(info.dateCompose, fieldName, MultiLineDrawFormat<PriceConsole>(mDateWidth))
-        column.isToday = info.date == 20210912
+        column.isToday = info.date == 20210918
         column.isHoliday = isHoliday(info)
         mDataList.add(ColumnDateInfo(fieldName, priceDataList, idList, channelList, dateList, priceList, clickEnableList, selectedList))
         mColumnList.add(column)
@@ -567,7 +567,7 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
 
     private fun initCalendar()
     {
-        mTableData?.calendarText = "2021-09-13"
+        // mTableData?.calendarText = "2021-09-13"
     }
 
     /**
