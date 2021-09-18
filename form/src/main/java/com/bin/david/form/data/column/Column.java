@@ -468,6 +468,9 @@ public class Column<T> implements Comparable<Column>
         }
     }
 
+    /**
+     * 获取是否可以点击列表
+     */
     public List<Boolean> getClickEnableList (List<T> objects) throws NoSuchFieldException,
                                                                      IllegalAccessException
     {
@@ -494,6 +497,9 @@ public class Column<T> implements Comparable<Column>
         return clickEnableList;
     }
 
+    /**
+     * 获取是否选中列表
+     */
     public List<Boolean> getSelectedList (List<T> objects) throws NoSuchFieldException,
                                                                   IllegalAccessException
     {
@@ -518,6 +524,35 @@ public class Column<T> implements Comparable<Column>
             }
         }
         return clickEnableList;
+    }
+
+    /**
+     * 获取日期列表
+     */
+    public List<Integer> getDateList (List<T> objects) throws NoSuchFieldException,
+                                                              IllegalAccessException
+    {
+
+        List<Integer> dateList = new ArrayList<>();
+        int size = objects.size();
+        if (size > 0)
+        {
+            for (int k = 0; k < size; k++)
+            {
+                Object child = objects.get(k);
+                Class childClazz = child.getClass();
+                Field columnNameField = childClazz.getDeclaredField("columnName");
+                columnNameField.setAccessible(true);
+                if ((String) columnNameField.get(child) == fieldName)
+                {
+                    Field dataListField = childClazz.getDeclaredField("dateList");
+                    dataListField.setAccessible(true);
+                    dateList = (List<Integer>) dataListField.get(child);
+                    break;
+                }
+            }
+        }
+        return dateList;
     }
 
 

@@ -65,7 +65,7 @@ public class TableData<T>
     /**
      * 当前显示的日期
      */
-    private String mCalendarText;
+    private String mCalendarText = "";
 
     /**
      * @param tableName 表名

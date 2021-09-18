@@ -5,6 +5,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.Rect;
+import android.util.Log;
 
 import com.bin.david.form.core.TableConfig;
 import com.bin.david.form.data.CellInfo;
@@ -73,6 +74,11 @@ public class TableProvider<T> implements TableClickObserver
 
     private CellInfo cellInfo = new CellInfo();
 
+    /**
+     * 左上角日历时间
+     */
+    private String mCalendarText = "";
+
     public TableProvider ()
     {
 
@@ -115,7 +121,7 @@ public class TableProvider<T> implements TableClickObserver
         {
             drawTip(canvas, tipPoint.x, tipPoint.y, tipColumn, tipPosition);
         }
-        drawCalendar(canvas, config);
+        // drawCalendar(canvas, config);
     }
 
 
@@ -284,6 +290,8 @@ public class TableProvider<T> implements TableClickObserver
                 clipCount++;
             }
             fillColumnTitle(canvas, info, left);
+            canvas.restore();
+            drawCalendar(canvas, info, left);
         }
         for (int i = 0; i < clipCount; i++)
         {
@@ -609,34 +617,54 @@ public class TableProvider<T> implements TableClickObserver
 
     /**
      * 绘制左上角日期文字
-     *
-     * @param canvas
-     * @param config
      */
-    private void drawCalendar (Canvas canvas, TableConfig config)
+    private void drawCalendar (Canvas canvas, ColumnInfo info, int left)
     {
 
+        Log.d("TAG", " ---- drawCalendar ------");
         List<ColumnInfo> columnInfoList = tableData.getColumnInfos();
         List<Column> columns = tableData.getChildColumns();
         Column column = columns.get(0);
         Object data = column.getDatas().get(0);
+        //日期列的宽度
         int width = columnInfoList.get(0).width;
         int top = columnInfoList.get(0).top;
         // 日历区域占用2个列标题的高度
         int height = config.getColumnDateTitleHeight() * 2;
         tempRect.set(showRect.left, top, width, height);
+        // 获取日期数字 -------------- start ---------
+        int end = width + info.column.getComputeWidth() / 2;
+        try
+        {
+            if (left >= width && left < end)
+            {
+                //日期列表
+                List<Integer> dateList = info.column.getDateList(tableData.getT());
+                if (dateList != null && dateList.size() > 0)
+                {
+                    mCalendarText = dateList.get(0).toString();
+                }
+            }
+        } catch (NoSuchFieldException e)
+        {
+            e.printStackTrace();
+        } catch (IllegalAccessException e)
+        {
+            e.printStackTrace();
+        }
+        // 获取日期数字 -------------- end  ----------
         if (DrawUtils.isClick(tempRect, clickPoint))
         {
 
-            clickCalendar("日期测试");
+            clickCalendar(mCalendarText);
             isClickPoint = true;
             clickPoint.set(-Integer.MAX_VALUE, -Integer.MAX_VALUE);
         }
         canvas.translate(0, 0);
         canvas.save();
         canvas.clipRect(tempRect);
-        String calendarText = tableData.getCalendarText();
-        cellInfo.set(column, data, calendarText, 0, 0);
+        //String calendarText = tableData.getCalendarText();
+        cellInfo.set(column, data, mCalendarText, 0, 0);
         config.getContentGridStyle().fillPaint(config.getPaint());
 
         //绘制背景

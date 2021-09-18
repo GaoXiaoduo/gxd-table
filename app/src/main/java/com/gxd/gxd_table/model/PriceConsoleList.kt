@@ -29,7 +29,7 @@ data class ColumnDateInfo
         var idList: MutableList<String>? = null,
         /** 每列显示渠道类型 */
         var channelList: MutableList<Int>? = null,
-        /** 每列显示的日期 */
+        /** 每列显示的日期,不可更改，在Column.fillData方法内调用 */
         var dateList: MutableList<Int>? = null,
         /** 每列显示的价格 */
         var priceList: MutableList<Int>? = null,
