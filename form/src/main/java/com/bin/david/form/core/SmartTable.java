@@ -7,7 +7,6 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -358,9 +357,9 @@ public class SmartTable<T> extends View implements OnTableChangeListener
     }
 
     /**
-     * 添加数据
+     * 添加列数据
      * 通过这个方法可以实现动态添加数据，参数isFoot可以实现首尾添加
-     * todo 添加列
+     * todo add by gaoxiaoduo 2021/09/10
      *
      * @param columns 新增列
      * @param isFoot
@@ -369,9 +368,6 @@ public class SmartTable<T> extends View implements OnTableChangeListener
             List<Column> columns, List<T> addData, Boolean isFoot,
             int startColumnPosition, int startChildColumnPosition)
     {
-
-        //        parser.addColumnsData(tableData, columns, addData, isFoot);
-        //        notifyDataChanged();
 
         if (columns != null && columns.size() > 0)
         {
@@ -384,7 +380,6 @@ public class SmartTable<T> extends View implements OnTableChangeListener
 
                     parser.addColumnsData(tableData, columns, addData, isFoot,
                             startColumnPosition, startChildColumnPosition);
-                    // parser.parse(tableData);
                     measurer.measure(tableData, config);
                     requestReMeasure();
                     postInvalidate();
@@ -523,7 +518,6 @@ public class SmartTable<T> extends View implements OnTableChangeListener
     public boolean onTouchEvent (MotionEvent event)
     {
 
-        Log.i("TAG", "滚动 onTouchEvent ------ ");
         return matrixHelper.handlerTouchEvent(event);
     }
 
@@ -540,7 +534,6 @@ public class SmartTable<T> extends View implements OnTableChangeListener
     public boolean dispatchTouchEvent (MotionEvent event)
     {
 
-        Log.i("TAG", "滚动 dispatchTouchEvent ");
         matrixHelper.onDisallowInterceptEvent(this, event);
         return super.dispatchTouchEvent(event);
     }
@@ -557,8 +550,6 @@ public class SmartTable<T> extends View implements OnTableChangeListener
     public void onTableChanged (float scale, float translateX, float translateY)
     {
 
-        //        Log.d("TAG", "滚动 onTableChanged scale：" + scale + "；translateX：" + translateX +
-        //                "；translateY：" + translateY);
         if (tableData != null)
         {
             config.setZoom(scale);
@@ -697,15 +688,10 @@ public class SmartTable<T> extends View implements OnTableChangeListener
     public int computeHorizontalScrollRange ()
     {
 
-        Log.d("TAG", "滚动 computeHorizontalScrollRange");
         final int contentWidth = getWidth() - getPaddingLeft() - getPaddingRight();
         int scrollRange = matrixHelper.getZoomRect().right;
         final int scrollX = -matrixHelper.getZoomRect().right;
         final int overScrollRight = Math.max(0, scrollRange - contentWidth);
-
-
-        Log.d("TAG", "滚动 computeHorizontalScrollRange contentWidth:" + contentWidth +
-                "；scrollRange：" + scrollRange + "；scrollX：" + scrollX);
 
         if (scrollX < 0)
         {
@@ -737,7 +723,6 @@ public class SmartTable<T> extends View implements OnTableChangeListener
     public int computeHorizontalScrollOffset ()
     {
 
-        Log.d("TAG", "滚动 computeHorizontalScrollOffset");
         return Math.max(0, -matrixHelper.getZoomRect().top);
     }
 
@@ -746,7 +731,6 @@ public class SmartTable<T> extends View implements OnTableChangeListener
     public int computeHorizontalScrollExtent ()
     {
 
-        Log.d("TAG", "滚动 computeHorizontalScrollExtent");
         return super.computeHorizontalScrollExtent();
     }
 

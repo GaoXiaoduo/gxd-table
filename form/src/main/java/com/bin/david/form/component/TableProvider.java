@@ -5,7 +5,6 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.Rect;
-import android.util.Log;
 
 import com.bin.david.form.core.TableConfig;
 import com.bin.david.form.data.CellInfo;
@@ -121,7 +120,6 @@ public class TableProvider<T> implements TableClickObserver
         {
             drawTip(canvas, tipPoint.x, tipPoint.y, tipColumn, tipPosition);
         }
-        // drawCalendar(canvas, config);
     }
 
 
@@ -593,30 +591,12 @@ public class TableProvider<T> implements TableClickObserver
             TableConfig config)
     {
 
-
-        //        if (config.getContentCellBackgroundFormat() != null)
-        //        {
-        //            config.getContentCellBackgroundFormat().drawBackground(c, rect, cellInfo,
-        //                    config.getPaint());
-        //        }
         if (config.getTableGridFormat() != null)
         {
             config.getContentGridStyle().fillPaint(config.getPaint());
             config.getTableGridFormat().drawContentGrid(c, cellInfo.col, cellInfo.row,
                     rect, cellInfo, config.getPaint());
         }
-        //
-        //        if (isColorBar)
-        //        {
-        //            new BaseBackgroundFormat(Integer.valueOf(cellInfo.value)).drawBackground(c,
-        //                    rect,
-        //                    config.getPaint());
-        //        }
-        //        else
-        //        {
-        //            rect.left += config.getTextLeftOffset();
-        //            cellInfo.column.getDrawFormat().draw(c, rect, cellInfo, config);
-        //        }
     }
 
     /**
@@ -625,7 +605,6 @@ public class TableProvider<T> implements TableClickObserver
     private void drawCalendar (Canvas canvas, ColumnInfo info, int left)
     {
 
-        Log.d("TAG", " ---- drawCalendar ------");
         List<ColumnInfo> columnInfoList = tableData.getColumnInfos();
         List<Column> columns = tableData.getChildColumns();
         Column column = columns.get(0);
@@ -667,7 +646,6 @@ public class TableProvider<T> implements TableClickObserver
         canvas.translate(0, 0);
         canvas.save();
         canvas.clipRect(tempRect);
-        //String calendarText = tableData.getCalendarText();
         cellInfo.set(column, data, mCalendarText, 0, 0);
         config.getContentGridStyle().fillPaint(config.getPaint());
 
