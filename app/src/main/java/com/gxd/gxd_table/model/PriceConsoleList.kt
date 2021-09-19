@@ -67,7 +67,7 @@ class PriceConsole
     @SerializedName("day_stock")
     var dayStock: DayStock? = null
 
-    /** */
+    /** 不同房型的房价列表 */
     @SerializedName("product_prices")
     var productPrices: MutableList<ProductPrice>? = null
 

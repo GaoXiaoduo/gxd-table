@@ -45,13 +45,13 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
     private val mBinding get() = _binding!!
 
     /** 彩条列名称 */
-    private var mColorColumnName: String = "color"
+    private val mColorColumnName: String = "color"
 
     /** 房型列名称 */
-    private var mHouseColumnName: String = "houseName"
+    private val mHouseColumnName: String = "houseName"
 
     /** 渠道列名称 */
-    private var mChannelColumnName: String = "channel"
+    private val mChannelColumnName: String = "channel"
 
     /** 表格数据 */
     var mTableData: TableData<ColumnDateInfo>? = null
@@ -76,12 +76,17 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
     /** 已选中的方格信息 key=列数，value=方格数据信息*/
     private var mSelectedCellMap = HashMap<Int, SelectedDateInfo>()
 
+    /** 今日日期 */
+    private val mToday = LocalDate.now()
+
+    /** 已显示的日期页数，每页面15天 */
+    private var mPage = 0
+
     override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
         _binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(mBinding.root)
-        mDateWidth = DensityUtils.dp2px(this@MainActivity, 52f)
         initFile()
         initTable()
     }
@@ -100,14 +105,17 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
         }
     }
 
+    /**
+     * 初始化表格
+     */
     private fun initTable()
     {
         mColorBarArray = getYColorBar()
+        mDateWidth = DensityUtils.dp2px(this@MainActivity, DATE_COLUMN_WIDTH)
         initFixedColumn()
         initData()
-        initCalendar()
         initTableConfig()
-        tableClick()
+        initTableClick()
     }
 
 
@@ -117,16 +125,16 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
     private fun initFixedColumn()
     {
         // 设置彩条列属性
-        val colorColumn = Column<PriceConsole>("", mColorColumnName, MultiLineDrawFormat<PriceConsole>(1))
+        val colorColumn = Column<PriceConsole>("", mColorColumnName, MultiLineDrawFormat<PriceConsole>(DensityUtils.dp2px(this@MainActivity, COLOR_BAR_COLUMN_WIDTH)))
         colorColumn.isFixed = true
         colorColumn.isAutoMerge = true
         colorColumn.isColorBar = true
         // 设置房型名称列属性
-        val houseNameColumn = Column<PriceConsole>("房型", mHouseColumnName, MultiLineDrawFormat<PriceConsole>(200))
+        val houseNameColumn = Column<PriceConsole>("房型", mHouseColumnName, MultiLineDrawFormat<PriceConsole>(DensityUtils.dp2px(this@MainActivity, PRODUCT_NAME_COLUMN_WIDTH)))
         houseNameColumn.isFixed = true
         houseNameColumn.isAutoMerge = true
         // 设置渠道列属性
-        val channelIconWidth = DensityUtils.dp2px(this@MainActivity, 23f)
+        val channelIconWidth = DensityUtils.dp2px(this@MainActivity, CHANNEL_COLUMN_WIDTH)
         val channelColumn = Column<String>("渠道", mChannelColumnName, object : ImageResDrawFormat<String>(channelIconWidth, channelIconWidth)
         {
             override fun getContext(): Context
@@ -136,17 +144,18 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
 
             override fun getResourceID(isCheck: String, value: String, position: Int): Int
             {
-                return ChannelViewHelper.getChannelIcon(isCheck.toInt()) //R.mipmap.ic_room_price_date_bg
+                return ChannelViewHelper.getChannelIcon(isCheck.toInt())
 
             }
         })
         channelColumn.isFixed = true
         // 设置日历列属性（包含彩条、房型、渠道3个子列）
-        val calendarColumn = Column<PriceConsole>("日历", colorColumn, houseNameColumn, channelColumn) // MultiLineDrawFormat<PriceConsole>(140)) // houseNameColumn) //, channelColumn)
+        val calendarColumn = Column<PriceConsole>("日历", colorColumn, houseNameColumn, channelColumn)
         calendarColumn.isFixed = true
         mColumnList.add(calendarColumn)
     }
 
+    /** 初始化表格数据 */
     private fun initData()
     {
         // 列数
@@ -214,7 +223,7 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
     private fun getPriceStockText(price: Int?, allowStock: Int): String
     {
         // 价格信息
-        var price: String = if (price == null || price == 0)
+        val price: String = if (price == null || price == 0)
         {
             " --"
         } else
@@ -237,8 +246,6 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
         mBinding.table.config.isShowTableTitle = false
         // 隐藏列标题
         mBinding.table.config.isShowColumnTitle = true
-        // 固定标题
-        //mBinding.table.config.isFixedTitle = true
         // 固定左侧颜色条颜色值数组
         mBinding.table.config.yColorBarArray = getYColorBar()
         // 设置日历背景
@@ -254,7 +261,7 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
             }
         }
         // 设置日历文字格式化24x12
-        mBinding.table.config.setCalendarTextFormat(object : CalendarTextImageDrawFormat<String>(DensityUtils.dp2px(this@MainActivity, 24f), DensityUtils.dp2px(this@MainActivity, 12f), BOTTOM, 0)
+        mBinding.table.config.setCalendarTextFormat(object : CalendarTextImageDrawFormat<String>(DensityUtils.dp2px(this@MainActivity, CALENDAR_TEXT_IMAGE_WIDTH), DensityUtils.dp2px(this@MainActivity, CALENDAR_TEXT_IMAGE_HEIGHT), BOTTOM, 0)
         {
             override fun getContext(): Context
             {
@@ -318,7 +325,10 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
         }
     }
 
-    private fun tableClick()
+    /***
+     * 初始化表格点击事件
+     */
+    private fun initTableClick()
     {
         // 单元格点击事件
         mTableData?.onItemClickListener = TableData.OnItemClickListener<String> { column, value, info, col, row ->
@@ -388,6 +398,12 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
         return intArrayOf(yColorBar1, yColorBar2, yColorBar3, yColorBar4)
     }
 
+    /**
+     * 获取节假日名称
+     *
+     * @param info 房价看板信息
+     * @return
+     */
     private fun getWeekOrHoliday(info: PriceConsole): String
     {
         val week = when (info.dateType)
@@ -427,6 +443,12 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
         return week!!
     }
 
+    /**
+     * 初始化每行信息
+     *
+     * @param info
+     * @param productList
+     */
     private fun initRowData(info: PriceConsole, productList: MutableList<ProductPrice>?)
     {
         if (productList.isNullOrEmpty())
@@ -436,17 +458,17 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
         // 当前列下的每个方格价格/余数列表
         val priceDataList = mutableListOf<String>()
         // 当前列下的每个方格房型id列表
-        var idList = mutableListOf<String>()
+        val idList = mutableListOf<String>()
         // 当前列下的每个方格渠道列表
-        var channelList = mutableListOf<Int>()
+        val channelList = mutableListOf<Int>()
         // 当前列下的每个方格日期列表
-        var dateList = mutableListOf<Int>()
+        val dateList = mutableListOf<Int>()
         // 当前列下的每个方格价格列表
-        var priceList = mutableListOf<Int>()
+        val priceList = mutableListOf<Int>()
         // 当前列下的每个方格是否可以点击列表
-        var clickEnableList = mutableListOf<Boolean>()
+        val clickEnableList = mutableListOf<Boolean>()
         // 当前列下的每个方格是否被选中列表
-        var selectedList = mutableListOf<Boolean>()
+        val selectedList = mutableListOf<Boolean>()
 
         for (j: Int in productList.indices)
         {
@@ -471,19 +493,25 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
         }
         val fieldName = "dateCompose_${info.date}"
         val column = Column<PriceConsole>(info.dateCompose, fieldName, MultiLineDrawFormat<PriceConsole>(mDateWidth))
-        column.isToday = info.date == 20210918
+        column.isToday = info.date == 20210919
         column.isHoliday = isHoliday(info)
         mDataList.add(ColumnDateInfo(fieldName, priceDataList, idList, channelList, dateList, priceList, clickEnableList, selectedList))
         mColumnList.add(column)
     }
 
-    private var page = 0
-
+    /**
+     * 添加列
+     *
+     * @param index
+     * @param isFoot  是否在为尾部添加
+     * @param startColumnPosition  开始的列坐标
+     * @param startChildColumnPosition  开始的子列坐标
+     */
     private fun addColumns(index: Int, isFoot: Boolean, startColumnPosition: Int, startChildColumnPosition: Int)
     {
         //index参数正式时去掉
-        var tmpColumnList = mutableListOf<Column<PriceConsole>>()
-        var tmpDataList: MutableList<ColumnDateInfo> = mutableListOf()
+        val tmpColumnList = mutableListOf<Column<PriceConsole>>()
+        val tmpDataList: MutableList<ColumnDateInfo> = mutableListOf()
 
         for (i: Int in mPriceList.indices)
         {
@@ -501,17 +529,17 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
             // 当前列下的每个方格价格/余数列表
             val priceDataList = mutableListOf<String>()
             // 当前列下的每个方格房型id列表
-            var idList = mutableListOf<String>()
+            val idList = mutableListOf<String>()
             // 当前列下的每个方格渠道列表
-            var channelList = mutableListOf<Int>()
+            val channelList = mutableListOf<Int>()
             // 当前列下的每个方格日期列表
-            var dateList = mutableListOf<Int>()
+            val dateList = mutableListOf<Int>()
             // 当前列下的每个方格价格列表
-            var priceList = mutableListOf<Int>()
+            val priceList = mutableListOf<Int>()
             // 当前列下的每个方格是否可以点击列表
-            var clickEnableList = mutableListOf<Boolean>()
+            val clickEnableList = mutableListOf<Boolean>()
             // 当前列下的每个方格是否被选中列表
-            var selectedList = mutableListOf<Boolean>()
+            val selectedList = mutableListOf<Boolean>()
 
             for (j: Int in productList.indices)
             {
@@ -535,7 +563,7 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
                     selectedList.add(false)
                 }
             }
-            val fieldName = "dateCompose_${info.date}_${index}_${page}"
+            val fieldName = "dateCompose_${info.date}_${index}_${mPage}"
             val column = Column<PriceConsole>(info.dateCompose, fieldName, MultiLineDrawFormat<PriceConsole>(mDateWidth))
             column.isToday = info.date == 20210912
             column.isHoliday = isHoliday(info)
@@ -543,7 +571,7 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
             tmpColumnList.add(column)
         }
         mBinding.table.addColumns(tmpColumnList, tmpDataList, isFoot, startColumnPosition, startChildColumnPosition)
-        page++
+        mPage++
     }
 
     override fun onTableScrollToRight()
@@ -565,11 +593,6 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
         addColumns(2, false, 1, 3)
     }
 
-    private fun initCalendar()
-    {
-        // mTableData?.calendarText = "2021-09-13"
-    }
-
     /**
      * 是否为周五、周六、假日
      *
@@ -585,6 +608,13 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
         return isHoliday || isWeekBg
     }
 
+    /**
+     * 判断方格是否可以点击
+     *
+     * @param price  价格
+     * @param date   日期
+     * @return true:可以点击；false:不可以点击
+     */
     private fun isClickEnable(price: Int?, date: Int): Boolean
     {
         val today = LocalDate.now()
@@ -602,81 +632,26 @@ class MainActivity : AppCompatActivity(), OnTableScrollRangeListener
         return true
     }
 
-    //    .setColumnCellBackgroundFormat(new BaseCellBackgroundFormat<Column>() {
-    //            @Override
-    //            public int getBackGroundColor(Column column) {
-    //                if("area".equals(column.getFieldName())) {
-    //                    return ContextCompat.getColor(NetHttpActivity.this,R.color.column_bg);
-    //                }
-    //                return TableConfig.INVALID_COLOR;
-    //            }
-    //            @Override
-    //            public int getTextColor(Column column) {
-    //                if("area".equals(column.getFieldName())) {
-    //                    return ContextCompat.getColor(NetHttpActivity.this, R.color.white);
-    //                }else{
-    //                    return TableConfig.INVALID_COLOR;
-    //                }
-    //            }
-    //        });
-
-    // 设置网格线
-    //        mBinding.table.config.tableGridFormat =
-    //                object : BaseAbstractGridFormat()
-    //                {
-    //
-    //                    override fun isShowVerticalLine(col: Int, row: Int, cellInfo: CellInfo<*>): Boolean
-    //                    {
-    //                        return true //col % 2 == 0
-    //                    }
-    //
-    //                    override fun isShowHorizontalLine(col: Int, row: Int, cellInfo: CellInfo<*>): Boolean
-    //                    {
-    //                        return true //row % 2 == 0
-    //                    }
-    //
-    //                    override fun isShowColumnTitleVerticalLine(col: Int, column: Column<*>): Boolean
-    //                    {
-    //                        Log.d(TAG, "网格线 垂直 列:$col,column:${column?.columnName},width:${column?.width},computeWidth:${column?.computeWidth}")
-    //
-    //                        if (col == 0 || col == 1)
-    //                        {
-    //                            return false
-    //                        }
-    //                        return true
-    //                    }
-    //
-    //                    override fun isShowColumnTitleHorizontalLine(col: Int, column: Column<*>): Boolean
-    //                    {
-    //                        // Log.d(TAG, "网格线 水平 列:$col,column:${column?.columnName}")
-    //
-    //                        if (col == 0 || col == 1 || col == 2)
-    //                        {
-    //                            return false
-    //                        }
-    //                        return true
-    //                    }
-    //
-    //
-    //                    //            override fun drawTableBorderGrid(canvas: Canvas?, left: Int, top: Int, right: Int, bottom: Int, paint: Paint?)
-    //                    //            {
-    //                    //                //                paint!!.strokeWidth = 10f
-    //                    //                //                paint.color = Color.GREEN
-    //                    //                //                canvas!!.drawRect(left.toFloat(), top.toFloat(), right.toFloat(), bottom.toFloat(), paint)
-    //                    //            }
-    //                    //
-    //                    override fun drawColumnTitleGrid(canvas: Canvas?, rect: Rect?, column: Column<*>, col: Int, paint: Paint?)
-    //                    {
-    //                        super.drawColumnTitleGrid(canvas, rect, column, col, paint)
-    //                        //                        paint!!.strokeWidth = 10f
-    //                        //                        paint.color = Color.RED
-    //                        //                        canvas!!.drawRect(0f, 0f, 200f, 400f, paint)
-    //                    }
-    //                }
-
-
     companion object
     {
+        /** 彩条列宽度*/
+        const val COLOR_BAR_COLUMN_WIDTH: Float = 1f
+
+        /** 房型列宽度*/
+        const val PRODUCT_NAME_COLUMN_WIDTH: Float = 60f
+
+        /** 渠道列宽度*/
+        const val CHANNEL_COLUMN_WIDTH: Float = 22f
+
+        /** 日期列宽度*/
+        const val DATE_COLUMN_WIDTH: Float = 40f
+
+        /** 日历区域向下icon宽度*/
+        const val CALENDAR_TEXT_IMAGE_WIDTH: Float = 24f
+
+        /** 日历区域向下icon宽度*/
+        const val CALENDAR_TEXT_IMAGE_HEIGHT: Float = 12f
+
         const val TAG = "表格"
     }
 }
